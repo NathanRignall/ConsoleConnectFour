@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading;
+
 
 namespace ConsoleConnectFour
 {
@@ -19,31 +19,20 @@ namespace ConsoleConnectFour
             }
         }
 
-        static void Main(string[] args)
+        protected static void setupConsole()
         {
-
-
-
-            Screen DefaultScreen = new Screen();
-
             Console.CursorVisible = false;
-            Console.Title = "Connect Four";
+            Console.Title = "Console Connect Four";
             Console.SetWindowSize(79, 42);
             Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
+        }
 
-            DefaultScreen.placeBoard();
 
-            WriteAt("+", 1, 0);
+        static void Main(string[] args)
+        {
+            setupConsole();
 
-            DefaultScreen.updateBoard();
-
-            Console.ReadKey(true);
-
-            while (true)
-            {
-                //DefaultScreen.placeBoard();
-                Thread.Sleep(100);
-            }
+            Game DefaultGame = new Game();
         }
     }
 }
