@@ -8,6 +8,7 @@ namespace ConsoleConnectFour
         /// <summary> Visual Board Outline for Console </summary>
         private static string[] boardOutline =
         {
+            "                     ",
             "[ ][ ][ ][ ][ ][ ][ ]",
             "[ ][ ][ ][ ][ ][ ][ ]",
             "[ ][ ][ ][ ][ ][ ][ ]",
@@ -26,13 +27,10 @@ namespace ConsoleConnectFour
         private static string boardFilledPiece = "x";
 
 
-        /// <summary> Visual character for loading board piece</summary>
-        private static string boardLoadPiece = "-";
-
-
         /// <summary> Contains the current placement of pieces in the board on screen</summary>
         private int[,] boardCurrentPlacement =
         {
+            { 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0 },
@@ -50,6 +48,7 @@ namespace ConsoleConnectFour
                 {{1,3},{4,3},{7,3},{10,3},{13,3},{16,3},{19,3}},
                 {{1,4},{4,4},{7,4},{10,4},{13,4},{16,4},{19,4}},
                 {{1,5},{4,5},{7,5},{10,5},{13,5},{16,5},{19,5}},
+                {{1,6},{4,6},{7,6},{10,6},{13,6},{16,6},{19,6}},
             };
 
         /// <summary> Initialize the board and print the board</summary>
@@ -61,6 +60,7 @@ namespace ConsoleConnectFour
             // print each line of grid out on board
             foreach (string i in boardOutline)
             {
+                Console.ForegroundColor = ConsoleColor.White;
                 Console.WriteLine(i);
             }
         }
@@ -77,13 +77,16 @@ namespace ConsoleConnectFour
                 switch (piece)
                 {
                     case 0:
-                        Console.WriteLine(boardEmptyPiece);
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.Write(boardEmptyPiece);
                         break;
                     case 1:
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.Write(boardFilledPiece);
                         break;
                     case 2:
-                        Console.Write(boardLoadPiece);
+                        Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.Write(boardFilledPiece);
                         break;
                 }
             }
