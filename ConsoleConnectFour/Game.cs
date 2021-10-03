@@ -7,7 +7,7 @@ namespace ConsoleConnectFour
     class Game
     {
         /// <summary> Visual Board Outline for Console </summary>
-        private int[,] boardDesiredPlacement =
+        private int[,] piecePlacement =
         {
             { 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0 },
@@ -19,63 +19,48 @@ namespace ConsoleConnectFour
         };
 
         /// <summary> Stores the current selected column for drop </summary>
-        private int selectedColumn = 3;
-
-        /// <summary> Simple write console fucnction used with debuging </summary>
-        protected static void WriteAt(string s, int x, int y)
-        {
-            try
-            {
-                Console.SetCursorPosition(x, y);
-                Console.Write(s);
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                Console.Clear();
-                Console.WriteLine(e.Message);
-            }
-        }
+        private int dropSelectedColumn = 3;
 
         /// <summary> Used to move the selected space before drop </summary>
-        private void move(bool direction, int player)
+        private void moveSelected(bool direction, int player)
         {
             // get the width of the baord
-            int boardWidth = boardDesiredPlacement.GetLength(0);
+            int gridWidth = piecePlacement.GetLength(0);
 
             // control the pacement of the selected column
-            if (direction == true)
+            if (direction)
             {
-                if (selectedColumn == (boardWidth - 1))
+                if (dropSelectedColumn == (gridWidth - 1))
                 {
-                    selectedColumn = 0;
+                    dropSelectedColumn = 0;
                 }
                 else
                 {
-                    selectedColumn++;
+                    dropSelectedColumn++;
                 }
             }
             else
             {
-                if (selectedColumn == 0)
+                if (dropSelectedColumn == 0)
                 {
-                    selectedColumn = (boardWidth - 1);
+                    dropSelectedColumn = (gridWidth - 1);
                 }
                 else
                 {
-                    selectedColumn--;
+                    dropSelectedColumn--;
                 }
             }
 
             // mark the correct spot in grid with mark
-            for (int i = 0; i < boardWidth; i++)
+            for (int i = 0; i < gridWidth; i++)
             {
-                if (i == selectedColumn)
+                if (i == dropSelectedColumn)
                 {
-                    boardDesiredPlacement[0, i] = player;
+                    piecePlacement[0, i] = player;
                 }
                 else
                 {
-                    boardDesiredPlacement[0, i] = 0;
+                    piecePlacement[0, i] = 0;
                 }
             }
 
@@ -85,22 +70,22 @@ namespace ConsoleConnectFour
         private bool drop(int player)
         {
             // get the width of the baord
-            int boardHeight = boardDesiredPlacement.GetLength(1);
+            int gridHeight = piecePlacement.GetLength(1);
 
             // used to say if teh piece has been dropped
             bool placedPiece = false;
 
             // move down until impact
-            for (int i = 1; i < boardHeight; i++)
+            for (int i = 1; i < gridHeight; i++)
             {
 
-                if (boardDesiredPlacement[i, selectedColumn] == 0)
+                if (piecePlacement[i, dropSelectedColumn] == 0)
                 {
                     // mark piece on array
-                    boardDesiredPlacement[(i), selectedColumn] = player;
+                    piecePlacement[(i), dropSelectedColumn] = player;
 
                     // clear previous piece on array
-                    boardDesiredPlacement[(i - 1), selectedColumn] = 0;
+                    piecePlacement[(i - 1), dropSelectedColumn] = 0;
 
                     // changed the marked piece as true
                     placedPiece = true;
@@ -115,41 +100,50 @@ namespace ConsoleConnectFour
         {
             Board DefaultScreen = new Board();
 
+            Logic DefaultLogic = new Logic();
+
             // stores which player is currently playing
             int player = 1;
 
             // main game loop
             while (true)
             {
-                DefaultScreen.updateBoard(boardDesiredPlacement);
+                DefaultScreen.updateBoard(piecePlacement);
 
                 ConsoleKey key = Console.ReadKey(true).Key;
 
                 if (key == ConsoleKey.RightArrow)
                 {
-                    move(true, player);
+                    moveSelected(true, player);
                 }
                 else if (key == ConsoleKey.LeftArrow)
                 {
-                    move(false, player);
+                    moveSelected(false, player);
                 }
                 else if (key == ConsoleKey.DownArrow)
                 {
                     if (drop(player))
                     {
+
+                        //if (DefaultLogic.gameOver(piecePlacement))
+                        //{
+                        //GlobalFunctions.WriteAt("Game Over", 0, 8);
+                        //}
+
                         if (player == 1)
                         {
                             player = 2;
-                            selectedColumn = 3;
+                            dropSelectedColumn = 3;
 
                         }
                         else
                         {
                             player = 1;
-                            selectedColumn = 3;
+                            dropSelectedColumn = 3;
                         }
 
-                        boardDesiredPlacement[0, 3] = player;
+                        piecePlacement[0, 3] = player;
+
                     }
 
                 }
@@ -158,6 +152,9 @@ namespace ConsoleConnectFour
 
                 }
             }
+
+            GlobalFunctions.WriteAt("Game Over 22", 0, 9);
+
         }
 
 

@@ -3,9 +3,10 @@
 
 namespace ConsoleConnectFour
 {
-    class Program
+
+    public static class GlobalFunctions
     {
-        protected static void WriteAt(string s, int x, int y)
+        public static void WriteAt(string s, int x, int y)
         {
             try
             {
@@ -18,7 +19,10 @@ namespace ConsoleConnectFour
                 Console.WriteLine(e.Message);
             }
         }
+    }
 
+    class Program
+    {
         protected static void setupConsole()
         {
             Console.CursorVisible = false;
