@@ -15,6 +15,7 @@ namespace ConsoleConnectFour
             "[ ][ ][ ][ ][ ][ ][ ]",
             "[ ][ ][ ][ ][ ][ ][ ]",
             "[ ][ ][ ][ ][ ][ ][ ]",
+            "---------------------",
         };
 
 
@@ -24,7 +25,7 @@ namespace ConsoleConnectFour
 
 
         /// <summary> Visual character for a board piece </summary>
-        private static string boardFilledPiece = "x";
+        private static string boardFilledPiece = "o";
 
 
         /// <summary> Contains the current placement of pieces in the board on screen</summary>
@@ -58,20 +59,20 @@ namespace ConsoleConnectFour
             Console.Clear();
 
             // print each line of grid out on board
-            foreach (string i in boardOutline)
+            foreach (string boardLine in boardOutline)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.WriteLine(i);
+                Console.WriteLine(boardLine);
             }
         }
 
         /// <summary> Places a board piece on the grid from given co-ordinates</summary>
-        protected void placePiece(int piece, int x, int y)
+        protected void placePiece(int piece, int y, int x)
         {
             try
             {
                 // move cursor position to correct place on grid
-                Console.SetCursorPosition(boardConolePlacement[x, y, 0], boardConolePlacement[x, y, 1]);
+                Console.SetCursorPosition(boardConolePlacement[y, x, 0], boardConolePlacement[y, x, 1]);
 
                 // write the piece to grid
                 switch (piece)
@@ -89,12 +90,15 @@ namespace ConsoleConnectFour
                         Console.Write(boardFilledPiece);
                         break;
                 }
+
+                // set colout back
+                Console.ForegroundColor = ConsoleColor.White;
             }
             // if the requested value is out of range of console/array
-            catch (ArgumentOutOfRangeException e)
+            catch (ArgumentOutOfRangeException error)
             {
                 Console.Clear();
-                Console.WriteLine(e.Message);
+                Console.WriteLine(error.Message);
             }
         }
 
@@ -105,16 +109,16 @@ namespace ConsoleConnectFour
             if (boardCurrentPlacement != boardDesiredPlacement)
             {
                 // foreach row in grid
-                for (int i = 0; i < boardDesiredPlacement.GetLength(0); i++)
+                for (int x = 0; x < boardDesiredPlacement.GetLength(0); x++)
                 {
                     // foreach collumn
-                    for (int j = 0; j < boardDesiredPlacement.GetLength(1); j++)
+                    for (int y = 0; y < boardDesiredPlacement.GetLength(1); y++)
                     {
                         // get the cell value
-                        int cell = boardDesiredPlacement[i, j];
+                        int cell = boardDesiredPlacement[y, x];
 
                         // place the piece on the board
-                        placePiece(cell, i, j);
+                        placePiece(cell, y, x);
                     }
                 }
             }

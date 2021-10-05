@@ -14,15 +14,15 @@ namespace ConsoleConnectFour
             { 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 1, 0, 0, 0, 0 },
-            { 0, 0, 1, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
         };
 
         /// <summary> Stores the current selected column for drop </summary>
         private int dropSelectedColumn = 3;
 
         /// <summary> Used to move the selected space before drop </summary>
-        private void moveSelected(bool direction, int player)
+        private void moveSelected(bool direction, int playerCode)
         {
             // get the width of the baord
             int gridWidth = piecePlacement.GetLength(0);
@@ -52,22 +52,22 @@ namespace ConsoleConnectFour
             }
 
             // mark the correct spot in grid with mark
-            for (int i = 0; i < gridWidth; i++)
+            for (int x = 0; x < gridWidth; x++)
             {
-                if (i == dropSelectedColumn)
+                if (x == dropSelectedColumn)
                 {
-                    piecePlacement[0, i] = player;
+                    piecePlacement[0, x] = playerCode;
                 }
                 else
                 {
-                    piecePlacement[0, i] = 0;
+                    piecePlacement[0, x] = 0;
                 }
             }
 
         }
 
         /// <summary> Drop the piece </summary>
-        private bool drop(int player)
+        private bool drop(int playerCode)
         {
             // get the width of the baord
             int gridHeight = piecePlacement.GetLength(1);
@@ -76,16 +76,16 @@ namespace ConsoleConnectFour
             bool placedPiece = false;
 
             // move down until impact
-            for (int i = 1; i < gridHeight; i++)
+            for (int y = 1; y < gridHeight; y++)
             {
 
-                if (piecePlacement[i, dropSelectedColumn] == 0)
+                if (piecePlacement[y, dropSelectedColumn] == 0)
                 {
                     // mark piece on array
-                    piecePlacement[(i), dropSelectedColumn] = player;
+                    piecePlacement[(y), dropSelectedColumn] = playerCode;
 
                     // clear previous piece on array
-                    piecePlacement[(i - 1), dropSelectedColumn] = 0;
+                    piecePlacement[(y - 1), dropSelectedColumn] = 0;
 
                     // changed the marked piece as true
                     placedPiece = true;
@@ -98,12 +98,12 @@ namespace ConsoleConnectFour
 
         public Game()
         {
+            // initiaze the classes
             Board DefaultScreen = new Board();
-
             Logic DefaultLogic = new Logic();
 
             // stores which player is currently playing
-            int player = 1;
+            int playerCode = 1;
 
             // main game loop
             while (true)
@@ -114,49 +114,49 @@ namespace ConsoleConnectFour
 
                 if (key == ConsoleKey.RightArrow)
                 {
-                    moveSelected(true, player);
+                    moveSelected(true, playerCode);
                 }
                 else if (key == ConsoleKey.LeftArrow)
                 {
-                    moveSelected(false, player);
+                    moveSelected(false, playerCode);
                 }
                 else if (key == ConsoleKey.DownArrow)
                 {
-                    if (drop(player))
+                    if (drop(playerCode))
                     {
 
-                        //if (DefaultLogic.gameOver(piecePlacement))
-                        //{
-                        //GlobalFunctions.WriteAt("Game Over", 0, 8);
-                        //}
-
-                        if (player == 1)
+                        if (DefaultLogic.gameOver(piecePlacement, dropSelectedColumn))
                         {
-                            player = 2;
+                            DefaultScreen.updateBoard(piecePlacement);
+
+                            string outputText = "Game Over! Well done " + playerCode.ToString();
+
+                            GlobalFunctions.WriteAt(outputText, 3, 8);
+                            break;
+                        }
+
+                        if (playerCode == 1)
+                        {
+                            playerCode = 2;
                             dropSelectedColumn = 3;
 
                         }
                         else
                         {
-                            player = 1;
+                            playerCode = 1;
                             dropSelectedColumn = 3;
                         }
 
-                        piecePlacement[0, 3] = player;
+                        piecePlacement[0, 3] = playerCode;
 
                     }
 
                 }
                 else if (key == ConsoleKey.Escape)
                 {
-
+                    break;
                 }
             }
-
-            GlobalFunctions.WriteAt("Game Over 22", 0, 9);
-
         }
-
-
     }
 }
