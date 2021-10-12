@@ -157,6 +157,8 @@ namespace ConsoleConnectFour
                     break;
                 }
             }
+
+            Console.ReadKey();
         }
     }
 }
