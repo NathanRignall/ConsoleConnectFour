@@ -4,73 +4,57 @@ using System.Threading;
 
 namespace ConsoleConnectFour
 {
-    class Game
+    class PeiceDrop
     {
-        /// <summary> Visual Board Outline for Console </summary>
-        private int[,] piecePlacement =
-        {
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-        };
+        public static int Column = 3;
 
-        /// <summary> Stores the current selected column for drop </summary>
-        private int dropSelectedColumn = 3;
-
-        /// <summary> Used to move the selected space before drop </summary>
-        private void moveSelected(bool direction, int playerCode)
+        public static void Move(bool direction, int playerCode, ref int[,] PiecePlacementGrid)
         {
             // get the width of the baord
-            int gridWidth = piecePlacement.GetLength(0);
+            int gridWidth = PiecePlacementGrid.GetLength(0);
 
             // control the pacement of the selected column
             if (direction)
             {
-                if (dropSelectedColumn == (gridWidth - 1))
+                if (Column == (gridWidth - 1))
                 {
-                    dropSelectedColumn = 0;
+                    Column = 0;
                 }
                 else
                 {
-                    dropSelectedColumn++;
+                    Column++;
                 }
             }
             else
             {
-                if (dropSelectedColumn == 0)
+                if (Column == 0)
                 {
-                    dropSelectedColumn = (gridWidth - 1);
+                    Column = (gridWidth - 1);
                 }
                 else
                 {
-                    dropSelectedColumn--;
+                    Column--;
                 }
             }
 
             // mark the correct spot in grid with mark
             for (int x = 0; x < gridWidth; x++)
             {
-                if (x == dropSelectedColumn)
+                if (x == Column)
                 {
-                    piecePlacement[0, x] = playerCode;
+                    PiecePlacementGrid[0, x] = playerCode;
                 }
                 else
                 {
-                    piecePlacement[0, x] = 0;
+                    PiecePlacementGrid[0, x] = 0;
                 }
             }
-
         }
 
-        /// <summary> Drop the piece </summary>
-        private bool drop(int playerCode)
+        public static bool Release(ref int[,] PiecePlacementGrid, int playerCode)
         {
             // get the width of the baord
-            int gridHeight = piecePlacement.GetLength(1);
+            int gridHeight = PiecePlacementGrid.GetLength(1);
 
             // used to say if teh piece has been dropped
             bool placedPiece = false;
@@ -79,13 +63,13 @@ namespace ConsoleConnectFour
             for (int y = 1; y < gridHeight; y++)
             {
 
-                if (piecePlacement[y, dropSelectedColumn] == 0)
+                if (PiecePlacementGrid[y, Column] == 0)
                 {
                     // mark piece on array
-                    piecePlacement[(y), dropSelectedColumn] = playerCode;
+                    PiecePlacementGrid[(y), Column] = playerCode;
 
                     // clear previous piece on array
-                    piecePlacement[(y - 1), dropSelectedColumn] = 0;
+                    PiecePlacementGrid[(y - 1), Column] = 0;
 
                     // changed the marked piece as true
                     placedPiece = true;
@@ -96,58 +80,81 @@ namespace ConsoleConnectFour
             return placedPiece;
         }
 
+        public static void Reset(ref int[,] PiecePlacementGrid, int playerCode)
+        {
+            Column = 3;
+
+            PiecePlacementGrid[0, Column] = playerCode;
+        }
+    }
+
+    class PiecePlacement
+    {
+        /// <summary> Visual Board Outline for Console </summary>
+        public static int[,] Grid =
+        {
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+        };
+
+        /// <summary> stores which player is currently playing </summary>
+        public static int PlayerCode = 1;
+
+    }
+
+    class Game
+    {
         public Game()
         {
             // initiaze the classes
-            Board DefaultScreen = new Board();
-            Logic DefaultLogic = new Logic();
-
-            // stores which player is currently playing
-            int playerCode = 1;
+            Screen.Setup();
 
             // main game loop
             while (true)
             {
-                DefaultScreen.updateBoard(piecePlacement);
+                Screen.Update(PiecePlacement.Grid);
 
                 ConsoleKey key = Console.ReadKey(true).Key;
 
                 if (key == ConsoleKey.RightArrow)
                 {
-                    moveSelected(true, playerCode);
+                    PeiceDrop.Move(true, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
                 }
                 else if (key == ConsoleKey.LeftArrow)
                 {
-                    moveSelected(false, playerCode);
+                    PeiceDrop.Move(false, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
                 }
                 else if (key == ConsoleKey.DownArrow)
                 {
-                    if (drop(playerCode))
+                    if (PeiceDrop.Release(ref PiecePlacement.Grid, PiecePlacement.PlayerCode))
                     {
 
-                        if (DefaultLogic.gameOver(piecePlacement, dropSelectedColumn))
+                        if (Logic.GameOver(PiecePlacement.Grid, PeiceDrop.Column))
                         {
-                            DefaultScreen.updateBoard(piecePlacement);
+                            Screen.Update(PiecePlacement.Grid);
 
-                            string outputText = "Game Over! Well done " + playerCode.ToString();
+                            string outputText = "Game Over! Well done " + PiecePlacement.PlayerCode.ToString();
 
                             GlobalFunctions.WriteAt(outputText, 3, 8);
                             break;
                         }
 
-                        if (playerCode == 1)
+                        if (PiecePlacement.PlayerCode == 1)
                         {
-                            playerCode = 2;
-                            dropSelectedColumn = 3;
+                            PiecePlacement.PlayerCode = 2;
+                            PeiceDrop.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
 
                         }
                         else
                         {
-                            playerCode = 1;
-                            dropSelectedColumn = 3;
+                            PiecePlacement.PlayerCode = 1;
+                            PeiceDrop.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
                         }
-
-                        piecePlacement[0, 3] = playerCode;
 
                     }
 

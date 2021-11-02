@@ -23,19 +23,8 @@ namespace ConsoleConnectFour
 
     class Program
     {
-        protected static void setupConsole()
-        {
-            Console.CursorVisible = false;
-            Console.Title = "Console Connect Four";
-            Console.SetWindowSize(79, 42);
-            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
-        }
-
-
         static void Main(string[] args)
         {
-            setupConsole();
-
             Game DefaultGame = new Game();
         }
     }

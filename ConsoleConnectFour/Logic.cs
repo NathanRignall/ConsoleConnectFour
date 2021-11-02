@@ -185,7 +185,7 @@ namespace ConsoleConnectFour
         }
 
         /// <summary> Function to hceck if the game is actually over </summary>
-        public bool gameOver(int[,] pieceGrid, int checkColumn)
+        public static bool GameOver(int[,] pieceGrid, int checkColumn)
         {
             // for each row as column known
             for (int y = 0; y < pieceGrid.GetLength(1); y++)
