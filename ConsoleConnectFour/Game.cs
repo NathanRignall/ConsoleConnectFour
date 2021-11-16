@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace ConsoleConnectFour
 {
-    class PeiceDrop
+    class DropSystem
     {
         public static int Column = 3;
 
@@ -73,6 +73,12 @@ namespace ConsoleConnectFour
 
                     // changed the marked piece as true
                     placedPiece = true;
+
+                    // update the screen
+                    GameScreen.Update(PiecePlacementGrid);
+
+                    // wait
+                    Thread.Sleep(20);
                 }
             }
 
@@ -102,6 +108,18 @@ namespace ConsoleConnectFour
             { 0, 0, 0, 0, 0, 0, 0 },
         };
 
+        /// <summary> Visual Board Outline for Console </summary>
+        public static int[,] EmptyGrid =
+        {
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+            { 0, 0, 0, 0, 0, 0, 0 },
+        };
+
         /// <summary> stores which player is currently playing </summary>
         public static int PlayerCode = 1;
 
@@ -109,63 +127,113 @@ namespace ConsoleConnectFour
 
     class Game
     {
-        public Game()
+        public static bool Active = true;
+        public static MenuItem Mode;
+
+        static public void Loop()
         {
             // initiaze the classes
-            Screen.Setup();
+            GameScreen.Setup();
+            DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
 
             // main game loop
             while (true)
             {
-                Screen.Update(PiecePlacement.Grid);
+                GameScreen.Update(PiecePlacement.Grid);
 
                 ConsoleKey key = Console.ReadKey(true).Key;
 
                 if (key == ConsoleKey.RightArrow)
                 {
-                    PeiceDrop.Move(true, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
+                    DropSystem.Move(true, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
                 }
                 else if (key == ConsoleKey.LeftArrow)
                 {
-                    PeiceDrop.Move(false, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
+                    DropSystem.Move(false, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
                 }
                 else if (key == ConsoleKey.DownArrow)
                 {
-                    if (PeiceDrop.Release(ref PiecePlacement.Grid, PiecePlacement.PlayerCode))
+                    if (DropSystem.Release(ref PiecePlacement.Grid, PiecePlacement.PlayerCode))
                     {
 
-                        if (Logic.GameOver(PiecePlacement.Grid, PeiceDrop.Column))
+                        if (Logic.GameOver(PiecePlacement.Grid, DropSystem.Column))
                         {
-                            Screen.Update(PiecePlacement.Grid);
-
                             string outputText = "Game Over! Well done " + PiecePlacement.PlayerCode.ToString();
 
                             GlobalFunctions.WriteAt(outputText, 3, 8);
                             break;
                         }
 
-                        if (PiecePlacement.PlayerCode == 1)
+                        // dual player
+                        if (Mode == MenuItem.dual)
                         {
-                            PiecePlacement.PlayerCode = 2;
-                            PeiceDrop.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            if (PiecePlacement.PlayerCode == 1)
+                            {
+                                PiecePlacement.PlayerCode = 2;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
 
+                            }
+                            else
+                            {
+                                PiecePlacement.PlayerCode = 1;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
                         }
-                        else
+
+                        // tripple player
+                        if (Mode == MenuItem.tripple)
                         {
-                            PiecePlacement.PlayerCode = 1;
-                            PeiceDrop.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            if (PiecePlacement.PlayerCode == 1)
+                            {
+                                PiecePlacement.PlayerCode = 2;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
+                            else if (PiecePlacement.PlayerCode == 2)
+                            {
+                                PiecePlacement.PlayerCode = 3;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
+                            else
+                            {
+                                PiecePlacement.PlayerCode = 1;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
                         }
 
+                        // quad player
+                        if (Mode == MenuItem.quad)
+                        {
+                            if (PiecePlacement.PlayerCode == 1)
+                            {
+                                PiecePlacement.PlayerCode = 2;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
+                            else if (PiecePlacement.PlayerCode == 2)
+                            {
+                                PiecePlacement.PlayerCode = 3;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
+                            else if (PiecePlacement.PlayerCode == 3)
+                            {
+                                PiecePlacement.PlayerCode = 4;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
+                            else
+                            {
+                                PiecePlacement.PlayerCode = 1;
+                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                            }
+                        }
                     }
 
                 }
                 else if (key == ConsoleKey.Escape)
                 {
+                    Game.Active = false;
+                    PiecePlacement.Grid = PiecePlacement.EmptyGrid;
                     break;
                 }
             }
-
-            Console.ReadKey();
         }
     }
 }

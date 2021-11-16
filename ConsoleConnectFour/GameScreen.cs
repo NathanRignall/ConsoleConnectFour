@@ -3,7 +3,7 @@
 namespace ConsoleConnectFour
 {
     /// <summary> Class for console game board </summary>
-    class Screen
+    class GameScreen
     {
         /// <summary> Visual Board Outline for Console </summary>
         static string[] boardOutline =
@@ -71,6 +71,14 @@ namespace ConsoleConnectFour
                         break;
                     case 2:
                         Console.ForegroundColor = ConsoleColor.Blue;
+                        Console.Write(filledPiece);
+                        break;
+                    case 3:
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.Write(filledPiece);
+                        break;
+                    case 4:
+                        Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.Write(filledPiece);
                         break;
                 }

@@ -25,7 +25,17 @@ namespace ConsoleConnectFour
     {
         static void Main(string[] args)
         {
-            Game DefaultGame = new Game();
+
+            while (true)
+            {
+                Menu.Loop();
+                GlobalFunctions.WriteAt("run", 1, 8);
+
+                if (Game.Active)
+                {
+                    Game.Loop();
+                }
+            }
         }
     }
 }
