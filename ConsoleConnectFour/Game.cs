@@ -4,11 +4,17 @@ using System.Threading;
 
 namespace ConsoleConnectFour
 {
+    struct gameExit
+    {
+        public string message;
+        public bool won;
+    }
+
     class DropSystem
     {
-        public static int Column = 3;
+        public int Column = 3;
 
-        public static void Move(bool direction, int playerCode, ref int[,] PiecePlacementGrid)
+        public void Move(bool direction, int playerCode, ref int[,] PiecePlacementGrid)
         {
             // get the width of the baord
             int gridWidth = PiecePlacementGrid.GetLength(0);
@@ -51,7 +57,7 @@ namespace ConsoleConnectFour
             }
         }
 
-        public static bool Release(ref int[,] PiecePlacementGrid, int playerCode)
+        public bool Release(ref int[,] PiecePlacementGrid, int playerCode)
         {
             // get the width of the baord
             int gridHeight = PiecePlacementGrid.GetLength(1);
@@ -86,10 +92,9 @@ namespace ConsoleConnectFour
             return placedPiece;
         }
 
-        public static void Reset(ref int[,] PiecePlacementGrid, int playerCode)
+        public void Reset(ref int[,] PiecePlacementGrid, int playerCode)
         {
             Column = 3;
-
             PiecePlacementGrid[0, Column] = playerCode;
         }
     }
@@ -97,19 +102,7 @@ namespace ConsoleConnectFour
     class PiecePlacement
     {
         /// <summary> Visual Board Outline for Console </summary>
-        public static int[,] Grid =
-        {
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-            { 0, 0, 0, 0, 0, 0, 0 },
-        };
-
-        /// <summary> Visual Board Outline for Console </summary>
-        public static int[,] EmptyGrid =
+        public int[,] Grid =
         {
             { 0, 0, 0, 0, 0, 0, 0 },
             { 0, 0, 0, 0, 0, 0, 0 },
@@ -121,107 +114,117 @@ namespace ConsoleConnectFour
         };
 
         /// <summary> stores which player is currently playing </summary>
-        public static int PlayerCode = 1;
+        public int PlayerCode = 1;
 
     }
 
     class Game
     {
-        public static bool Active = true;
-        public static MenuItem Mode;
+        MenuItem mode;
+        PiecePlacement piecePlacementInstance;
+        DropSystem dropSystemInstance;
 
-        static public void Loop()
+        public Game(MenuItem Mode)
         {
-            // initiaze the classes
-            GameScreen.Setup();
-            DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+            mode = Mode;
 
+            piecePlacementInstance = new PiecePlacement();
+            dropSystemInstance = new DropSystem();
+
+            GameScreen.Setup();
+            dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+
+        }
+
+        public gameExit Loop()
+        {
             // main game loop
             while (true)
             {
-                GameScreen.Update(PiecePlacement.Grid);
+                GameScreen.Update(piecePlacementInstance.Grid);
 
                 ConsoleKey key = Console.ReadKey(true).Key;
 
                 if (key == ConsoleKey.RightArrow)
                 {
-                    DropSystem.Move(true, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
+                    dropSystemInstance.Move(true, piecePlacementInstance.PlayerCode, ref piecePlacementInstance.Grid);
                 }
                 else if (key == ConsoleKey.LeftArrow)
                 {
-                    DropSystem.Move(false, PiecePlacement.PlayerCode, ref PiecePlacement.Grid);
+                    dropSystemInstance.Move(false, piecePlacementInstance.PlayerCode, ref piecePlacementInstance.Grid);
                 }
                 else if (key == ConsoleKey.DownArrow)
                 {
-                    if (DropSystem.Release(ref PiecePlacement.Grid, PiecePlacement.PlayerCode))
+                    if (dropSystemInstance.Release(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode))
                     {
 
-                        if (Logic.GameOver(PiecePlacement.Grid, DropSystem.Column))
+                        if (Logic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
                         {
-                            string outputText = "Game Over! Well done " + PiecePlacement.PlayerCode.ToString();
+                            gameExit returnMessage;
+                            returnMessage.won = true;
+                            returnMessage.message = "Game Over! Well done " + piecePlacementInstance.PlayerCode.ToString();
 
-                            GlobalFunctions.WriteAt(outputText, 3, 8);
-                            break;
+                            return returnMessage;
                         }
 
                         // dual player
-                        if (Mode == MenuItem.dual)
+                        if (mode == MenuItem.dual)
                         {
-                            if (PiecePlacement.PlayerCode == 1)
+                            if (piecePlacementInstance.PlayerCode == 1)
                             {
-                                PiecePlacement.PlayerCode = 2;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 2;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
 
                             }
                             else
                             {
-                                PiecePlacement.PlayerCode = 1;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 1;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                         }
 
                         // tripple player
-                        if (Mode == MenuItem.tripple)
+                        if (mode == MenuItem.tripple)
                         {
-                            if (PiecePlacement.PlayerCode == 1)
+                            if (piecePlacementInstance.PlayerCode == 1)
                             {
-                                PiecePlacement.PlayerCode = 2;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 2;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
-                            else if (PiecePlacement.PlayerCode == 2)
+                            else if (piecePlacementInstance.PlayerCode == 2)
                             {
-                                PiecePlacement.PlayerCode = 3;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 3;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                             else
                             {
-                                PiecePlacement.PlayerCode = 1;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 1;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                         }
 
                         // quad player
-                        if (Mode == MenuItem.quad)
+                        if (mode == MenuItem.quad)
                         {
-                            if (PiecePlacement.PlayerCode == 1)
+                            if (piecePlacementInstance.PlayerCode == 1)
                             {
-                                PiecePlacement.PlayerCode = 2;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 2;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
-                            else if (PiecePlacement.PlayerCode == 2)
+                            else if (piecePlacementInstance.PlayerCode == 2)
                             {
-                                PiecePlacement.PlayerCode = 3;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 3;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
-                            else if (PiecePlacement.PlayerCode == 3)
+                            else if (piecePlacementInstance.PlayerCode == 3)
                             {
-                                PiecePlacement.PlayerCode = 4;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 4;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                             else
                             {
-                                PiecePlacement.PlayerCode = 1;
-                                DropSystem.Reset(ref PiecePlacement.Grid, PiecePlacement.PlayerCode);
+                                piecePlacementInstance.PlayerCode = 1;
+                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                         }
                     }
@@ -229,9 +232,11 @@ namespace ConsoleConnectFour
                 }
                 else if (key == ConsoleKey.Escape)
                 {
-                    Game.Active = false;
-                    PiecePlacement.Grid = PiecePlacement.EmptyGrid;
-                    break;
+                    gameExit returnMessage;
+                    returnMessage.won = false;
+                    returnMessage.message = "Quit";
+
+                    return returnMessage;
                 }
             }
         }

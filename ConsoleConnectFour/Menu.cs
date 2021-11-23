@@ -13,6 +13,7 @@ namespace ConsoleConnectFour
         dual,
         tripple,
         quad,
+        quit,
 
     }
 
@@ -21,7 +22,7 @@ namespace ConsoleConnectFour
 
         public static int Row = 0;
 
-        public static MenuItem[] items = { MenuItem.play, MenuItem.leaderboard, MenuItem.settings };
+        public static MenuItem[] items = { MenuItem.play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
 
         public static MenuItem selected = MenuItem.play;
 
@@ -76,7 +77,9 @@ namespace ConsoleConnectFour
 
         public static void Return()
         {
-            items = new MenuItem[] { MenuItem.play, MenuItem.leaderboard, MenuItem.settings };
+            items = new MenuItem[] { MenuItem.play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
+            selected = MenuItem.play;
+            Row = 0;
         }
     }
 
@@ -106,8 +109,8 @@ namespace ConsoleConnectFour
                 {
                     if (MenuSystem.Select())
                     {
-                        Game.Active = true;
-                        Game.Mode = MenuSystem.selected;
+                        //Game.Active = true;
+                        //Game.Mode = MenuSystem.selected;
                         break;
                     }
                 }

@@ -25,16 +25,26 @@ namespace ConsoleConnectFour
     {
         static void Main(string[] args)
         {
+            Console.CursorVisible = false;
+            Console.Title = "Console Connect Four";
+            Console.SetWindowSize(79, 30);
+            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
+
+            gameExit gameExitInfo;
 
             while (true)
             {
                 Menu.Loop();
-                GlobalFunctions.WriteAt("run", 1, 8);
 
-                if (Game.Active)
+                Game gameInstance = new Game(MenuSystem.selected);
+                gameExitInfo = gameInstance.Loop();
+
+                if (gameExitInfo.won)
                 {
-                    Game.Loop();
+                    Message messageInstance = new Message(gameExitInfo);
+                    messageInstance.Loop();
                 }
+
             }
         }
     }

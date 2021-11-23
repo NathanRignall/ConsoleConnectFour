@@ -98,10 +98,6 @@ namespace ConsoleConnectFour
         public static void Setup()
         {
             // clears the board of any exiting verbose
-            Console.CursorVisible = false;
-            Console.Title = "Console Connect Four";
-            Console.SetWindowSize(79, 42);
-            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
             Console.Clear();
 
             // print each line of grid out on board
