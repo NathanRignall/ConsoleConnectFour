@@ -168,7 +168,7 @@ namespace ConsoleConnectFour
                         }
 
                         // dual player
-                        if (mode == MenuItem.dual)
+                        if (mode == MenuItem.local_dual)
                         {
                             if (piecePlacementInstance.PlayerCode == 1)
                             {
@@ -184,7 +184,7 @@ namespace ConsoleConnectFour
                         }
 
                         // tripple player
-                        if (mode == MenuItem.tripple)
+                        if (mode == MenuItem.local_tripple)
                         {
                             if (piecePlacementInstance.PlayerCode == 1)
                             {
@@ -204,7 +204,7 @@ namespace ConsoleConnectFour
                         }
 
                         // quad player
-                        if (mode == MenuItem.quad)
+                        if (mode == MenuItem.local_quad)
                         {
                             if (piecePlacementInstance.PlayerCode == 1)
                             {

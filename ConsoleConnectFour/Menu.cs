@@ -6,13 +6,16 @@ namespace ConsoleConnectFour
 {
     enum MenuItem
     {
-        play,
+        local_play,
+        local_single,
+        local_dual,
+        local_tripple,
+        local_quad,
         leaderboard,
         settings,
-        single,
-        dual,
-        tripple,
-        quad,
+        login,
+        register,
+        info,
         quit,
 
     }
@@ -22,9 +25,9 @@ namespace ConsoleConnectFour
 
         public static int Row = 0;
 
-        public static MenuItem[] items = { MenuItem.play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
+        public static MenuItem[] items = { MenuItem.local_play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
 
-        public static MenuItem selected = MenuItem.play;
+        public static MenuItem selected = MenuItem.local_play;
 
         public static void Move(bool direction)
         {
@@ -62,13 +65,25 @@ namespace ConsoleConnectFour
         {
             switch (selected)
             {
-                case MenuItem.play:
-                    items = new MenuItem[] { MenuItem.single, MenuItem.dual, MenuItem.tripple, MenuItem.quad };
-                    selected = MenuItem.single;
+                case MenuItem.local_play:
+                    items = new MenuItem[] { MenuItem.local_single, MenuItem.local_dual, MenuItem.local_tripple, MenuItem.local_quad };
+                    selected = MenuItem.local_single;
+                    Row = 0;
                     return false;
-                case MenuItem.dual:
-                case MenuItem.tripple:
-                case MenuItem.quad:
+                case MenuItem.local_dual:
+                case MenuItem.local_tripple:
+                case MenuItem.local_quad:
+                    return true;
+                case MenuItem.settings:
+                    items = new MenuItem[] { MenuItem.login, MenuItem.register, MenuItem.info };
+                    selected = MenuItem.login;
+                    Row = 0;
+                    return false;
+                case MenuItem.login:
+                    return true;
+                case MenuItem.register:
+                    return true;
+                case MenuItem.info:
                     return true;
                 default:
                     return false;
@@ -77,8 +92,8 @@ namespace ConsoleConnectFour
 
         public static void Return()
         {
-            items = new MenuItem[] { MenuItem.play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
-            selected = MenuItem.play;
+            items = new MenuItem[] { MenuItem.local_play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
+            selected = MenuItem.local_play;
             Row = 0;
         }
     }
@@ -109,8 +124,6 @@ namespace ConsoleConnectFour
                 {
                     if (MenuSystem.Select())
                     {
-                        //Game.Active = true;
-                        //Game.Mode = MenuSystem.selected;
                         break;
                     }
                 }

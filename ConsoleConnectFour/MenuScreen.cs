@@ -12,20 +12,26 @@ namespace ConsoleConnectFour
         {
             switch (item)
             {
-                case MenuItem.play:
+                case MenuItem.local_play:
                     return "Play";
+                case MenuItem.local_single:
+                    return "Single Player";
+                case MenuItem.local_dual:
+                    return "2 Player";
+                case MenuItem.local_tripple:
+                    return "3 Player";
+                case MenuItem.local_quad:
+                    return "4 Player";
                 case MenuItem.leaderboard:
                     return "Leaderbaord";
                 case MenuItem.settings:
                     return "Settings";
-                case MenuItem.single:
-                    return "Single Player";
-                case MenuItem.dual:
-                    return "2 Player";
-                case MenuItem.tripple:
-                    return "3 Player";
-                case MenuItem.quad:
-                    return "4 Player";
+                case MenuItem.login:
+                    return "Login";
+                case MenuItem.register:
+                    return "Register";
+                case MenuItem.info:
+                    return "Info";
                 default:
                     return "test";
             }
