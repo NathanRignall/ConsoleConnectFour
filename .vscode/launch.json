@@ -10,7 +10,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/ConsoleConnectFour/bin/Debug/netcoreapp3.1/ConsoleConnectFour.dll",
+            "program": "${workspaceFolder}/ConsoleConnectFour/bin/Debug/net6.0/ConsoleConnectFour.dll",
             "args": [],
             "cwd": "${workspaceFolder}/ConsoleConnectFour",
             // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
