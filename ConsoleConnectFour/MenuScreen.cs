@@ -2,9 +2,48 @@ using System;
 
 namespace ConsoleConnectFour
 {
+    public static class Extension
+    {
+        public static string PadSides(this string str, int totalWidth, char paddingChar = ' ')
+        {
+            int padding = totalWidth - str.Length;
+            int padLeft = padding / 2 + str.Length;
+            return str.PadLeft(padLeft, paddingChar).PadRight(totalWidth, paddingChar);
+        }
+    }
+
     /// <summary> Class for console menu render - Methods are static due to this being used in many places without init</summary>
     class MenuScreen
     {
+        /// <summary> Visual menu outline for console </summary>
+        static string[] menuOutline =
+            {
+                "                                           ",
+                "                                           ",
+                "                                           ",
+                "                                           ",
+                "                                           ",
+                "                                           ",
+                "               * Game Menu *               ",
+                "       +--------------------------+        ",
+                "       |                          |        ",
+                "       |                          |        ",
+                "       |                          |        ",
+                "       |                          |        ",
+                "       |                          |        ",
+                "       |                          |        ",
+                "       |                          |        ",
+                "       +--------------------------+        ",
+                "                                           ",
+                "           Console Connect Four            ",
+                "                                           ",
+                "                                           ",
+                "                                           ",
+                "                                           ",
+                "                                           ",
+                "                                           ",
+        };
+
         static MenuItem[] currentMenuItems;
 
         static string getMenuItemString(MenuItem item)
@@ -12,17 +51,17 @@ namespace ConsoleConnectFour
             switch (item)
             {
                 case MenuItem.local_play:
-                    return "Play";
+                    return "Local Play";
                 case MenuItem.local_single:
                     return "Single Player";
                 case MenuItem.local_dual:
-                    return "2 Player";
+                    return "Two Player";
                 case MenuItem.local_tripple:
-                    return "3 Player";
+                    return "Three Player";
                 case MenuItem.local_quad:
-                    return "4 Player";
+                    return "Four Player";
                 case MenuItem.leaderboard:
-                    return "Leaderbaord";
+                    return "Online Leaderbaord";
                 case MenuItem.settings:
                     return "Settings";
                 case MenuItem.login:
@@ -37,22 +76,39 @@ namespace ConsoleConnectFour
         }
 
         /// <summary> Initialize the menu and print what is needed</summary>
-        public static void Setup()
+        public static void Setup(bool loggedIn, UserObj user)
         {
             Console.Clear();
+
+            Console.ForegroundColor = ConsoleColor.White;
+
+            // Height of the menu
+            int menuHeight = menuOutline.GetLength(0);
+
+            // Print each line of grid out on board
+            for (int y = 0; y < menuHeight; y++)
+            {
+                Console.SetCursorPosition(6, y);
+
+                if (y == 22 && loggedIn) {
+                    Console.WriteLine(user.username);
+                } else {
+                    Console.WriteLine(menuOutline[y]);
+                }
+            }
         }
 
         /// <summary> Fucntion used to update the menu a menu array and selected</summary>
         public static void Update(MenuItem[] desiredMenuItems, MenuItem selectedMenuItem)
         {
             // Itteration of print
-            int x = 0;
+            int x = 8;
 
             // Wipe only if whole menu list is changed
             if (currentMenuItems != desiredMenuItems)
             {
-               Console.Clear();
-            }
+               //Console.Clear();
+            };
 
             // Update the stored menu items
             currentMenuItems = desiredMenuItems;
@@ -61,19 +117,18 @@ namespace ConsoleConnectFour
             foreach (MenuItem item in currentMenuItems)
             {
                 Console.ForegroundColor = ConsoleColor.White;
-                Console.SetCursorPosition(0, x);
+                Console.SetCursorPosition(14, x);
 
-                if (item == selectedMenuItem)
+                string output = getMenuItemString(item);
+
+                 if (item == selectedMenuItem)
                 {
-                    Console.WriteLine($"[{getMenuItemString(item)}]");
-
+                    output = $"[{output}]";
                 }
-                else
-                {
-                    Console.WriteLine($" {getMenuItemString(item)} ");
-                }
+                
+                Console.WriteLine(output.PadSides(26));
 
-                x+=2;
+                x+=1;
             }
         }
     }

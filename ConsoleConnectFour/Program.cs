@@ -21,7 +21,7 @@ namespace ConsoleConnectFour
             // Main game loop - contains sub loops but always returns here.
             while (true)
             {
-                Menu menuInstance = new Menu();
+                Menu menuInstance = new Menu(Client.LoggedIn, Client.User);
                 MenuItem systemMode = menuInstance.Loop();
 
                 switch (systemMode)

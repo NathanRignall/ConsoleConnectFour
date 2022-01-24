@@ -117,11 +117,11 @@ namespace ConsoleConnectFour
         MenuSystem menuSystemInstance;
 
         /// <summary> Init class by setting vars and starting screen </summary>
-        public Menu()
+        public Menu(bool loggedIn, UserObj user)
         {
             menuSystemInstance = new MenuSystem();
 
-            MenuScreen.Setup();
+            MenuScreen.Setup(loggedIn, user);
         }
 
         public MenuItem Loop()

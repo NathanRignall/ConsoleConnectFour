@@ -15,7 +15,16 @@ namespace ConsoleConnectFour
         public static void Update(LeaderboardObj[] scores)
         {
             Console.Clear();
-            Console.WriteLine("test");
+            
+            // Number of scores
+            int scoreCount = scores.GetLength(0);
+
+            // Print each line of grid out on board
+            for (int i = 0; i < scoreCount; i++)
+            {
+                Console.SetCursorPosition(6, i);
+                Console.WriteLine(scores[i]);
+            }
         }
     }
 }

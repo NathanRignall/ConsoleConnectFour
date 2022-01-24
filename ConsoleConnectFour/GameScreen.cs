@@ -5,7 +5,7 @@ namespace ConsoleConnectFour
     /// <summary> Class for console game board render - Methods are static due to this being used in many places without init</summary>
     class GameScreen
     {
-        /// <summary> Visual Board Outline for Console </summary>
+        /// <summary> Visual board outline for console </summary>
         static string[] boardOutline =
             {
                 "                                           ",
@@ -136,7 +136,7 @@ namespace ConsoleConnectFour
 
             Console.ForegroundColor = ConsoleColor.White;
 
-            // Height of the menu
+            // Height of the board
             int boardHeight = boardOutline.GetLength(0);
 
             // Print each line of grid out on board

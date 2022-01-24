@@ -9,14 +9,14 @@ using Newtonsoft.Json;
 
 namespace ConsoleConnectFour
 {
-    public class UserPayloadObj
+    public struct UserPayloadObj
     {
         public UserObj user { get; set; }
         public string message { get; set; }
         public string reqid { get; set; }
     }
 
-    public class UserObj
+    public struct UserObj
     {
         public string id { get; set; }
         public string email { get; set; }
@@ -46,6 +46,7 @@ namespace ConsoleConnectFour
     class Client
     {
         public static bool LoggedIn;
+        public static UserObj User;
         private static CookieContainer cookieContainer;
         private static HttpClientHandler clienthandler;
         private static HttpClient apiClient;
@@ -64,6 +65,8 @@ namespace ConsoleConnectFour
 
         public static async Task Login()
         {
+            Console.Clear();
+            
             Console.WriteLine("Login System \n");
 
             Console.WriteLine("Enter Email \n");
@@ -82,24 +85,25 @@ namespace ConsoleConnectFour
                 string responseBody = await postResponse.Content.ReadAsStringAsync();
                 var userPayload = JsonConvert.DeserializeObject<UserPayloadObj>(responseBody);
 
-                Console.WriteLine(userPayload.message);
-
                 LoggedIn = true;
+                User = userPayload.user;
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
+                Console.ReadKey();
             }
             catch (Newtonsoft.Json.JsonException) // Invalid JSON
             {
                 Console.WriteLine("Invalid JSON.");
+                Console.ReadKey();
             }
-
-            Console.ReadKey();
         }
 
         public static async Task Register()
         {
+            Console.Clear();
+
             Console.WriteLine("Register System \n");
 
             Console.WriteLine("Enter Email:");
@@ -121,20 +125,20 @@ namespace ConsoleConnectFour
                 string responseBody = await postResponse.Content.ReadAsStringAsync();
                 var userPayload = JsonConvert.DeserializeObject<UserPayloadObj>(responseBody);
 
-                Console.WriteLine(userPayload.user.id);
-                Console.WriteLine(userPayload.message);
+                LoggedIn = true;
+                User = userPayload.user;
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
+                Console.ReadKey();
             }
             catch (Newtonsoft.Json.JsonException e) // Invalid JSON
             {
                 Console.WriteLine("Invalid JSON.");
                 Console.WriteLine(e.Message);
+                Console.ReadKey();
             }
-
-            Console.ReadKey();
         }
 
         public static async Task Info()
