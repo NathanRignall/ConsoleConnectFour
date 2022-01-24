@@ -73,7 +73,7 @@ namespace ConsoleConnectFour
                     Console.WriteLine($" {getMenuItemString(item)} ");
                 }
 
-                x++;
+                x+=2;
             }
         }
     }
