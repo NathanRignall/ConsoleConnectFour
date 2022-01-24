@@ -2,23 +2,23 @@ using System;
 
 namespace ConsoleConnectFour
 {
-    /// <summary> Class for game logic </summary>
+    /// <summary> Class for game logic - Methods are static due to this being used in many places without init</summary>
     class Logic
     {
         /// <summary> Function used to check if a peice is on a connect 4 line </summary>
         static bool checkPiece(int[,] pieceGrid, int currentPieceY, int currentPieceX, int currentPiecePlayer)
         {
-            // counters to see if a connect has been made
+            // Counters to see if a connect has been made
             int horizontalCounter = 0;
             int verticalCounter = 0;
             int angled1Counter = 0;
             int angled2Counter = 0;
 
-            // bounds for grid
+            // Bounds for grid
             int gridWidth = pieceGrid.GetLength(0);
             int gridHeight = pieceGrid.GetLength(1);
 
-            // check in the horizontal to the right
+            // Check in the horizontal to the right
             int horizontalRightCheck = currentPieceX;
             while (true)
             {
@@ -40,7 +40,7 @@ namespace ConsoleConnectFour
             }
 
 
-            // check in the horizontal to the left
+            // Check in the horizontal to the left
             int horizontalLeftCheck = currentPieceX;
             while (true)
             {
@@ -61,7 +61,7 @@ namespace ConsoleConnectFour
                 }
             }
 
-            // check in the vertical down
+            // Check in the vertical down
             int verticalDownCheck = currentPieceY;
             while (true)
             {
@@ -82,7 +82,7 @@ namespace ConsoleConnectFour
                 }
             }
 
-            // check in the angle 1 Up
+            // Check in the angle 1 Up
             int angled1UpCheckX = currentPieceX;
             int angled1UpCheckY = currentPieceY;
             while (true)
@@ -105,7 +105,7 @@ namespace ConsoleConnectFour
                 }
             }
 
-            // check in the angle 1 Down
+            // Check in the angle 1 Down
             int angled1DownCheckX = currentPieceX;
             int angled1DownCheckY = currentPieceY;
             while (true)
@@ -128,7 +128,7 @@ namespace ConsoleConnectFour
                 }
             }
 
-            // check in the angle 2 Up
+            // Check in the angle 2 Up
             int angled2UpCheckX = currentPieceX;
             int angled2UpCheckY = currentPieceY;
             while (true)
@@ -151,7 +151,7 @@ namespace ConsoleConnectFour
                 }
             }
 
-            // check in the angle 2 Down
+            // Check in the angle 2 Down
             int angled2DownCheckX = currentPieceX;
             int angled2DownCheckY = currentPieceY;
             while (true)
@@ -175,7 +175,7 @@ namespace ConsoleConnectFour
             }
 
 
-            // finally check if the amount is greater than if won
+            // Finally check if the amount is greater than 3 to see if won
             if (horizontalCounter >= 3 || verticalCounter >= 3 || angled1Counter >= 3 || angled2Counter >= 3)
             {
                 return true;
@@ -184,19 +184,19 @@ namespace ConsoleConnectFour
             return false;
         }
 
-        /// <summary> Function to hceck if the game is actually over </summary>
+        /// <summary> Function to check if the game is actually over </summary>
         public static bool GameOver(int[,] pieceGrid, int checkColumn)
         {
-            // for each row as column known
+            // For each row as column known (downwards)
             for (int y = 0; y < pieceGrid.GetLength(1); y++)
             {
-                // get the cell value
+                // Get the cell value
                 int player = pieceGrid[y, checkColumn];
 
-                // only check piece if not empty
+                // Only check piece if not empty
                 if (player != 0)
                 {
-                    // check a few pieces if a connect is on them
+                    // Check a pieces if a connect is on them
                     if (checkPiece(pieceGrid, y, checkColumn, player))
                     {
                         return true;

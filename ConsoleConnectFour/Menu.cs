@@ -4,6 +4,7 @@ using System.Threading;
 
 namespace ConsoleConnectFour
 {
+    /// <summary> Enum for the various menu possible items </summary>
     enum MenuItem
     {
         local_play,
@@ -20,24 +21,29 @@ namespace ConsoleConnectFour
 
     }
 
+    /// <summary> Class used to manage the selected column in the menu </summary>
     class MenuSystem
     {
+        /// <summary> The current row of the menu selected </summary>
+        int Row = 0;
 
-        public static int Row = 0;
+        /// <summary> Array of current items in menu selection </summary>
+        public MenuItem[] items;
 
-        public static MenuItem[] items = { MenuItem.local_play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
+        /// <summary> The current selected item in the menu list (not done by index)</summary>
+        public MenuItem selected = MenuItem.local_play;
 
-        public static MenuItem selected = MenuItem.local_play;
-
-        public static void Move(bool direction)
+        /// <summary> Move the selected row up or down </summary>
+        public void Move(bool direction)
         {
-            // get the width of the baord
-            int total = items.GetLength(0);
+            // Height of the menu
+            int menuHeight = items.GetLength(0);
 
-            // control the pacement of the selected column
+            // Move up or down based on the bool direction
             if (direction)
             {
-                if (Row == (total - 1))
+                // Check if reached row bound 
+                if (Row == (menuHeight - 1))
                 {
                     Row = 0;
                 }
@@ -48,9 +54,10 @@ namespace ConsoleConnectFour
             }
             else
             {
+                // Check if reached row bound 
                 if (Row == 0)
                 {
-                    Row = (total - 1);
+                    Row = (menuHeight - 1);
                 }
                 else
                 {
@@ -58,10 +65,12 @@ namespace ConsoleConnectFour
                 }
             }
 
+            // Set the selected item
             selected = items[Row];
         }
 
-        public static bool Select()
+         /// <summary> Select the selected row in the menu and output if action is required</summary>
+        public bool Select()
         {
             switch (selected)
             {
@@ -73,6 +82,8 @@ namespace ConsoleConnectFour
                 case MenuItem.local_dual:
                 case MenuItem.local_tripple:
                 case MenuItem.local_quad:
+                    return true;
+                case MenuItem.leaderboard:
                     return true;
                 case MenuItem.settings:
                     items = new MenuItem[] { MenuItem.login, MenuItem.register, MenuItem.info };
@@ -90,7 +101,8 @@ namespace ConsoleConnectFour
             }
         }
 
-        public static void Return()
+        /// <summary> Init class by setting variables to default </summary>
+        public MenuSystem()
         {
             items = new MenuItem[] { MenuItem.local_play, MenuItem.leaderboard, MenuItem.settings, MenuItem.quit };
             selected = MenuItem.local_play;
@@ -98,38 +110,52 @@ namespace ConsoleConnectFour
         }
     }
 
+    /// <summary> Class for whole menu </summary>
     class Menu
     {
-        static public void Loop()
-        {
-            // setup the screen
-            MenuScreen.Setup();
+        /// <summary> Paired menu system instance </summary>
+        MenuSystem menuSystemInstance;
 
-            // menu loop
+        /// <summary> Init class by setting vars and starting screen </summary>
+        public Menu()
+        {
+            menuSystemInstance = new MenuSystem();
+
+            MenuScreen.Setup();
+        }
+
+        public MenuItem Loop()
+        {
+            // Main menu loop
             while (true)
             {
-                MenuScreen.Update(MenuSystem.items, MenuSystem.selected);
+                // Re-render the screen on each action
+                MenuScreen.Update(menuSystemInstance.items, menuSystemInstance.selected);
 
+                 // The key that was last pressed by the user
                 ConsoleKey key = Console.ReadKey(true).Key;
 
+                // Check which key was pressed for approriate action
                 if (key == ConsoleKey.UpArrow)
                 {
-                    MenuSystem.Move(false);
+                    menuSystemInstance.Move(false);
                 }
                 else if (key == ConsoleKey.DownArrow)
                 {
-                    MenuSystem.Move(true);
+                    menuSystemInstance.Move(true);
                 }
                 else if (key == ConsoleKey.Enter)
                 {
-                    if (MenuSystem.Select())
+                    // Only if the menu should exit
+                    if (menuSystemInstance.Select())
                     {
-                        break;
+                        return menuSystemInstance.selected;
                     }
                 }
                 else if (key == ConsoleKey.Escape)
                 {
-                    MenuSystem.Return();
+                    // Reset the class back to home
+                    menuSystemInstance = new MenuSystem();
                 }
             }
         }

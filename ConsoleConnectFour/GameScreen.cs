@@ -2,7 +2,7 @@
 
 namespace ConsoleConnectFour
 {
-    /// <summary> Class for console game board </summary>
+    /// <summary> Class for console game board render - Methods are static due to this being used in many places without init</summary>
     class GameScreen
     {
         /// <summary> Visual Board Outline for Console </summary>
@@ -55,10 +55,10 @@ namespace ConsoleConnectFour
         {
             try
             {
-                // move cursor position to correct place on grid
+                // Move cursor position to correct place on grid
                 Console.SetCursorPosition(boardConolePlacement[y, x, 0], boardConolePlacement[y, x, 1]);
 
-                // write the piece to grid
+                // Write the piece to grid
                 switch (piece)
                 {
                     case 0:
@@ -83,24 +83,25 @@ namespace ConsoleConnectFour
                         break;
                 }
 
-                // set colour back
+                // Set colour back
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            // if the requested value is out of range of console/array
+            // If the requested value is out of range of console/array (should not happen)
             catch (ArgumentOutOfRangeException error)
             {
                 Console.Clear();
                 Console.WriteLine(error.Message);
+                Console.ReadKey();
             }
         }
 
         /// <summary> Initialize the board and print the board</summary>
         public static void Setup()
         {
-            // clears the board of any exiting verbose
+            // Clears the board of any exiting verbose
             Console.Clear();
 
-            // print each line of grid out on board
+            // Print each line of grid out on board
             foreach (string boardLine in boardOutline)
             {
                 Console.ForegroundColor = ConsoleColor.White;
@@ -108,19 +109,19 @@ namespace ConsoleConnectFour
             }
         }
 
-        /// <summary> fucntion used to update the game board given piece array</summary>
+        /// <summary> Function used to update the game board given piece array</summary>
         public static void Update(int[,] desiredPiecePlacementGrid)
         {
-            // make sure the baord has actually updated
+            // Make sure the baord has actually updated
             if (currentPiecePlacementGrid != desiredPiecePlacementGrid)
             {
-                // foreach row in grid
+                // Foreach row in grid
                 for (int x = 0; x < desiredPiecePlacementGrid.GetLength(0); x++)
                 {
-                    // foreach collumn
+                    // Foreach collumn
                     for (int y = 0; y < desiredPiecePlacementGrid.GetLength(1); y++)
                     {
-                        // get the cell value
+                        // Get the cell value
                         int cell = desiredPiecePlacementGrid[y, x];
 
                         // place the piece on the board

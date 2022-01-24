@@ -2,16 +2,16 @@ using System;
 
 namespace ConsoleConnectFour
 {
-    /// <summary> Class for console game board </summary>
+    /// <summary> Class for console message render - Methods are static due to this being used in many places without init </summary>
     class MessageScreen
     {
-        /// <summary> Initialize the board and print the board</summary>
+        /// <summary> Initialize the message and print what is needed</summary>
         public static void Setup()
         {
             Console.Clear();
         }
 
-        /// <summary> fucntion used to update the game board given piece array</summary>
+        /// <summary> Fucntion used to update the message given a new message</summary>
         public static void Update(string message)
         {
             Console.Clear();

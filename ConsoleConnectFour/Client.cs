@@ -5,10 +5,18 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace ConsoleConnectFour
 {
-    public class User
+    public class UserPayloadObj
+    {
+        public UserObj user { get; set; }
+        public string message { get; set; }
+        public string reqid { get; set; }
+    }
+
+    public class UserObj
     {
         public string id { get; set; }
         public string email { get; set; }
@@ -16,29 +24,45 @@ namespace ConsoleConnectFour
         public string password { get; set; }
     }
 
-    public class Response
+    public class LeaderboardPayloadObj
     {
-        public string payload { get; set; }
+        public LeaderboardObj[] scores { get; set; }
+        public string message { get; set; }
+        public string reqid { get; set; }
     }
+
+    public class LeaderboardObj
+    {
+        public int total_points { get; set; }
+        public UserObj user { get; set; }
+    }
+
+    public class ScoreObj
+    {
+        public int points { get; set; }
+    }
+
 
     class Client
     {
+        public static bool LoggedIn;
         private static CookieContainer cookieContainer;
         private static HttpClientHandler clienthandler;
-        private HttpClient apiClient;
+        private static HttpClient apiClient;
 
-        public Client()
+
+        public static void Setup()
         {
             cookieContainer = new CookieContainer();
             clienthandler = new HttpClientHandler { AllowAutoRedirect = true, UseCookies = true, CookieContainer = cookieContainer };
 
             apiClient = new HttpClient(clienthandler);
-
             apiClient.BaseAddress = new Uri("http://localhost:4000");
 
+            LoggedIn = false;
         }
 
-        public async Task Login()
+        public static async Task Login()
         {
             Console.WriteLine("Login System \n");
 
@@ -48,7 +72,7 @@ namespace ConsoleConnectFour
             Console.WriteLine("Enter Password \n");
             string password = Console.ReadLine();
 
-            var postUser = new User { email = email, password = password };
+            var postUser = new UserObj { email = email, password = password };
 
             try
             {
@@ -56,20 +80,25 @@ namespace ConsoleConnectFour
                 postResponse.EnsureSuccessStatusCode();
 
                 string responseBody = await postResponse.Content.ReadAsStringAsync();
+                var userPayload = JsonConvert.DeserializeObject<UserPayloadObj>(responseBody);
 
-                Console.WriteLine(responseBody);
+                Console.WriteLine(userPayload.message);
 
-                Console.ReadKey();
+                LoggedIn = true;
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
-
-                Console.ReadKey();
             }
+            catch (Newtonsoft.Json.JsonException) // Invalid JSON
+            {
+                Console.WriteLine("Invalid JSON.");
+            }
+
+            Console.ReadKey();
         }
 
-        public async Task Register()
+        public static async Task Register()
         {
             Console.WriteLine("Register System \n");
 
@@ -82,7 +111,7 @@ namespace ConsoleConnectFour
             Console.WriteLine("Enter Password");
             string password = Console.ReadLine();
 
-            var postUser = new User { email = email, username = username, password = password };
+            var postUser = new UserObj { email = email, username = username, password = password };
 
             try
             {
@@ -90,28 +119,34 @@ namespace ConsoleConnectFour
                 postResponse.EnsureSuccessStatusCode();
 
                 string responseBody = await postResponse.Content.ReadAsStringAsync();
+                var userPayload = JsonConvert.DeserializeObject<UserPayloadObj>(responseBody);
 
-                Console.WriteLine(responseBody);
-
-                Console.ReadKey();
+                Console.WriteLine(userPayload.user.id);
+                Console.WriteLine(userPayload.message);
             }
             catch (HttpRequestException e)
             {
                 Console.WriteLine(e.Message);
-
-                Console.ReadKey();
             }
+            catch (Newtonsoft.Json.JsonException e) // Invalid JSON
+            {
+                Console.WriteLine("Invalid JSON.");
+                Console.WriteLine(e.Message);
+            }
+
+            Console.ReadKey();
         }
 
-        public async Task Info()
+        public static async Task Info()
         {
             Console.WriteLine("Info System \n");
 
             try
             {
-                var user = await apiClient.GetFromJsonAsync<User>("/session");
+                var userPayload = await apiClient.GetFromJsonAsync<UserPayloadObj>("/session");
 
-                Console.WriteLine(user.id);
+                Console.WriteLine(userPayload.user.id);
+                Console.WriteLine(userPayload.message);
 
             }
             catch (HttpRequestException) // Non success
@@ -122,12 +157,53 @@ namespace ConsoleConnectFour
             {
                 Console.WriteLine("The content type is not supported.");
             }
-            catch (JsonException) // Invalid JSON
+            catch (System.Text.Json.JsonException) // Invalid JSON
             {
                 Console.WriteLine("Invalid JSON.");
             }
 
             Console.ReadKey();
+        }
+
+        public static async Task<LeaderboardPayloadObj> Leaderboard()
+        {
+            try
+            {
+                var leaderboardPayload = await apiClient.GetFromJsonAsync<LeaderboardPayloadObj>("/leaderboard/4a16036e-a969-4211-9a14-32702eee265f");
+
+                return leaderboardPayload;
+            }
+            catch (HttpRequestException) // Non success
+            {
+                Console.WriteLine("An error occurred.");
+            }
+            catch (NotSupportedException) // When content type is not valid
+            {
+                Console.WriteLine("The content type is not supported.");
+            }
+            catch (System.Text.Json.JsonException e) // Invalid JSON
+            {
+                Console.WriteLine("Invalid JSON.");
+                Console.WriteLine(e.Message);
+            }
+
+            return null;
+        }
+
+        public static async Task AddPoints(int points)
+        {
+            var postUser = new ScoreObj { points = points };
+
+            try
+            {
+                HttpResponseMessage postResponse = await apiClient.PostAsJsonAsync("/leaderboard/4a16036e-a969-4211-9a14-32702eee265f", postUser);
+                postResponse.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
         }
     }
 }

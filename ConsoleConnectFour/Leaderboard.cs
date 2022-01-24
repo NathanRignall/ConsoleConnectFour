@@ -3,33 +3,27 @@ using System;
 
 namespace ConsoleConnectFour
 {
-    /// <summary> Class for whole message </summary>
-    class Message
+    /// <summary> Class for whole leaderboard </summary>
+    class Leaderboard
     {
-        /// <summary> Current message to be output </summary>
-        string message;
-
-        /// <summary> Init class by setting vars and starting screen </summary>
-        public Message(GameExitStatus gameExitInfo)
-        {
-            message = gameExitInfo.message;
-
-            MessageScreen.Setup();
+        /// <summary> Init class by starting screen</summary>
+        public Leaderboard() {
+            LeaderboardScreen.Setup();
         }
 
         /// <summary> Loop for each interaction with console </summary>
         public void Loop()
         {
-            // Main menu loop
+            // Main leaderboard loop
             while (true)
             {
-                // Re-render the screen on each action
-                MessageScreen.Update(message);
+                //LeaderboardPayloadObj response = Client.Leaderboard();
+
+                //LeaderboardScreen.Update(response.scores);
 
                 // The key that was last pressed by the user
                 ConsoleKey key = Console.ReadKey(true).Key;
 
-                // Check which key was pressed for approriate action
                 if (key == ConsoleKey.Enter)
                 {
                     break;

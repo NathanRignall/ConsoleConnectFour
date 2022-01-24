@@ -4,24 +4,29 @@ using System.Threading;
 
 namespace ConsoleConnectFour
 {
-    struct gameExit
+    /// <summary> Structure used for the end of a game </summary>
+    struct GameExitStatus
     {
         public string message;
         public bool won;
     }
 
+    /// <summary> Class used to manage drops of pieces in the game </summary>
     class DropSystem
     {
+        /// <summary> The current column of the board selected </summary>
         public int Column = 3;
 
+        /// <summary> Move the selected column to the left or right </summary>
         public void Move(bool direction, int playerCode, ref int[,] PiecePlacementGrid)
         {
-            // get the width of the baord
+            // Width of the board
             int gridWidth = PiecePlacementGrid.GetLength(0);
 
-            // control the pacement of the selected column
+            // Move to the left or right based on the bool direction
             if (direction)
             {
+                // Check if reached column bound 
                 if (Column == (gridWidth - 1))
                 {
                     Column = 0;
@@ -33,6 +38,7 @@ namespace ConsoleConnectFour
             }
             else
             {
+                // Check if reached column bound  
                 if (Column == 0)
                 {
                     Column = (gridWidth - 1);
@@ -43,7 +49,7 @@ namespace ConsoleConnectFour
                 }
             }
 
-            // mark the correct spot in grid with mark
+            // Mark the correct spot in grid with player code or 0
             for (int x = 0; x < gridWidth; x++)
             {
                 if (x == Column)
@@ -57,51 +63,54 @@ namespace ConsoleConnectFour
             }
         }
 
+        /// <summary> Drop a piece in the selected column </summary>
         public bool Release(ref int[,] PiecePlacementGrid, int playerCode)
         {
-            // get the width of the baord
+            // Hieght of the board
             int gridHeight = PiecePlacementGrid.GetLength(1);
 
-            // used to say if teh piece has been dropped
+            // Sate if a peice was relased as not always possible
             bool placedPiece = false;
 
-            // move down until impact
+            // Move peice down until impact
             for (int y = 1; y < gridHeight; y++)
             {
 
                 if (PiecePlacementGrid[y, Column] == 0)
                 {
-                    // mark piece on array
+                    // Add peice to array with current player code
                     PiecePlacementGrid[(y), Column] = playerCode;
 
-                    // clear previous piece on array
+                    // Remove piece on previous location (above)
                     PiecePlacementGrid[(y - 1), Column] = 0;
 
-                    // changed the marked piece as true
+                    // Has been possible to drop a peice so set flag to true
                     placedPiece = true;
 
-                    // update the screen
+                    // Re-render the screen on each move down
                     GameScreen.Update(PiecePlacementGrid);
 
-                    // wait
+                    // Some time delay to give animation effect
                     Thread.Sleep(20);
                 }
             }
 
-            // return if the peice was able to be dropped at the space
+            // Return if the peice was able to be dropped in the column
             return placedPiece;
         }
 
-        public void Reset(ref int[,] PiecePlacementGrid, int playerCode)
+        /// <summary> Init class by setting variables to default </summary>
+        public DropSystem(ref int[,] PiecePlacementGrid, int playerCode)
         {
             Column = 3;
             PiecePlacementGrid[0, Column] = playerCode;
         }
     }
 
-    class PiecePlacement
+    /// <summary> Structure used to hold the location of peices in a baord and whos go it is </summary>
+    struct PiecePlacement
     {
-        /// <summary> Visual Board Outline for Console </summary>
+        /// <summary> Array where the current peices on board are stored </summary>
         public int[,] Grid =
         {
             { 0, 0, 0, 0, 0, 0, 0 },
@@ -113,38 +122,47 @@ namespace ConsoleConnectFour
             { 0, 0, 0, 0, 0, 0, 0 },
         };
 
-        /// <summary> stores which player is currently playing </summary>
+        /// <summary> Stores code of which player is currently playing </summary>
         public int PlayerCode = 1;
 
     }
 
+    /// <summary> Class for main gameplay </summary>
     class Game
     {
-        MenuItem mode;
+         /// <summary> Paired piece system instance </summary>
         PiecePlacement piecePlacementInstance;
+
+         /// <summary> Paired menu system instance </summary>
         DropSystem dropSystemInstance;
 
+        /// <summary> Stored game mode</summary>
+        MenuItem gameMode;
+
+        /// <summary> Init class by setting vars and starting screen</summary>
         public Game(MenuItem Mode)
         {
-            mode = Mode;
+            gameMode = Mode;
 
             piecePlacementInstance = new PiecePlacement();
-            dropSystemInstance = new DropSystem();
+            dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
 
             GameScreen.Setup();
-            dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
-
         }
 
-        public gameExit Loop()
+        /// <summary> Loop for each interaction with console </summary>
+        public GameExitStatus Loop()
         {
-            // main game loop
+            // Main game loop
             while (true)
             {
+                // Re-render the screen on each action
                 GameScreen.Update(piecePlacementInstance.Grid);
 
+                // The key that was last pressed by the user
                 ConsoleKey key = Console.ReadKey(true).Key;
 
+                // Check which key was pressed for approriate action
                 if (key == ConsoleKey.RightArrow)
                 {
                     dropSystemInstance.Move(true, piecePlacementInstance.PlayerCode, ref piecePlacementInstance.Grid);
@@ -155,76 +173,83 @@ namespace ConsoleConnectFour
                 }
                 else if (key == ConsoleKey.DownArrow)
                 {
+                    // Only need to check if the game has eneded/switch active player if a piece was dropped
                     if (dropSystemInstance.Release(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode))
                     {
-
+                        // Use the game logic to check if a piece was dropped in the board
                         if (Logic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
                         {
-                            gameExit returnMessage;
+                            // Contains the outcome of the game insatnce
+                            GameExitStatus returnMessage;
                             returnMessage.won = true;
                             returnMessage.message = "Game Over! Well done " + piecePlacementInstance.PlayerCode.ToString();
+
+                            // Only add to leaderboard if player 1 won
+                            if(piecePlacementInstance.PlayerCode == 1 && Client.LoggedIn) {
+                                Client.AddPoints(10);
+                            }
 
                             return returnMessage;
                         }
 
-                        // dual player
-                        if (mode == MenuItem.local_dual)
+                        // Dual player selection sequence
+                        if (gameMode == MenuItem.local_dual)
                         {
                             if (piecePlacementInstance.PlayerCode == 1)
                             {
                                 piecePlacementInstance.PlayerCode = 2;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
 
                             }
                             else
                             {
                                 piecePlacementInstance.PlayerCode = 1;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                         }
 
-                        // tripple player
-                        if (mode == MenuItem.local_tripple)
+                        // Tripple player selection sequence
+                        if (gameMode == MenuItem.local_tripple)
                         {
                             if (piecePlacementInstance.PlayerCode == 1)
                             {
                                 piecePlacementInstance.PlayerCode = 2;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                             else if (piecePlacementInstance.PlayerCode == 2)
                             {
                                 piecePlacementInstance.PlayerCode = 3;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                             else
                             {
                                 piecePlacementInstance.PlayerCode = 1;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                         }
 
-                        // quad player
-                        if (mode == MenuItem.local_quad)
+                        // Quad player selection sequence
+                        if (gameMode == MenuItem.local_quad)
                         {
                             if (piecePlacementInstance.PlayerCode == 1)
                             {
                                 piecePlacementInstance.PlayerCode = 2;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                             else if (piecePlacementInstance.PlayerCode == 2)
                             {
                                 piecePlacementInstance.PlayerCode = 3;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                             else if (piecePlacementInstance.PlayerCode == 3)
                             {
                                 piecePlacementInstance.PlayerCode = 4;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                             else
                             {
                                 piecePlacementInstance.PlayerCode = 1;
-                                dropSystemInstance.Reset(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                             }
                         }
                     }
@@ -232,7 +257,8 @@ namespace ConsoleConnectFour
                 }
                 else if (key == ConsoleKey.Escape)
                 {
-                    gameExit returnMessage;
+                    // Contains the outcome of the game insatnce
+                    GameExitStatus returnMessage;
                     returnMessage.won = false;
                     returnMessage.message = "Quit";
 
