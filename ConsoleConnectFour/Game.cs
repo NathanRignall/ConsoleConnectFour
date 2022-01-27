@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace ConsoleConnectFour
@@ -9,6 +10,316 @@ namespace ConsoleConnectFour
     {
         public string message;
         public bool won;
+    }
+
+    class FullSimBoard
+    {
+        int[] height;
+        int counter;
+        long[] moves;
+        long[] bitBoard;
+        long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
+
+        public FullSimBoard(int[] setHeight, int setCounter, long[] setMoves, long[] setBitBoard)
+        {
+            height = setHeight;
+            counter = setCounter;
+            moves = setMoves;
+            bitBoard = setBitBoard;
+        }
+
+        public bool PlacePiece(int col)
+        {
+            if ((TOP & (1L << height[col])) == 0)
+            {
+                long move = 1L << height[col]++;
+                bitBoard[counter & 1] ^= move;
+                moves[counter++] = col;
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool IsFull()
+        {
+            for (int col = 0; col <= 6; col++)
+            {
+                if ((TOP & (1L << height[col])) == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public List<int> PossibleMoves()
+        {
+            List<int> possibleMoves = new List<int>();
+            long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
+
+            for (int col = 0; col <= 6; col++)
+            {
+                if ((TOP & (1L << height[col])) == 0) possibleMoves.Add(col);
+            }
+
+            return possibleMoves;
+        }
+
+        public bool IsWin(int player)
+        {
+            long currentBitBoard = bitBoard[player];
+
+            int[] directions = { 1, 7, 6, 8 };
+            long bb;
+
+            for (int i = 0; i < directions.Length; i++)
+            {
+                int direction = directions[i];
+
+                bb = currentBitBoard & (currentBitBoard >> direction);
+                if ((bb & (bb >> (2 * direction))) != 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    struct DataSimBoard
+    {
+        public int[] height;
+        public int counter;
+        public long[] moves;
+        public long[] bitBoard;
+    }
+
+    class SimBoard
+    {
+        public static long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
+
+        public static DataSimBoard MakeMove(DataSimBoard board, int col)
+        {
+            long move = 1L << board.height[col]++; // (1)
+            board.bitBoard[board.counter & 1] ^= move;  // (2)
+            board.moves[board.counter++] = col;         // (3)
+
+            return board;
+        }
+
+        public static bool IsWin(DataSimBoard board, int player)
+        {
+            long currentBitBoard = board.bitBoard[player];
+
+            int[] directions = { 1, 7, 6, 8 };
+            long bb;
+
+            for (int i = 0; i < directions.Length; i++)
+            {
+                int direction = directions[i];
+
+                bb = currentBitBoard & (currentBitBoard >> direction);
+                if ((bb & (bb >> (2 * direction))) != 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public static bool IsFull(DataSimBoard board)
+        {
+            for (int col = 0; col <= 6; col++)
+            {
+                if ((TOP & (1L << board.height[col])) == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    class Bitboard
+    {
+        public int[] height;
+        public int counter;
+        public long[] moves;
+        public long[] bitBoard;
+        long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
+
+        Random rand;
+
+        public Bitboard()
+        {
+            height = new int[] { 0, 7, 14, 21, 28, 35, 42 };
+            counter = 0;
+            moves = new long[42];
+            bitBoard = new long[2];
+
+            rand = new Random();
+        }
+
+        public void MakeMove(int col)
+        {
+            long move = 1L << height[col]++; // (1)
+            bitBoard[counter & 1] ^= move;  // (2)
+            moves[counter++] = col;         // (3)
+        }
+
+        public void UndoMove()
+        {
+            long col = moves[--counter];     // reverses (3)
+            long move = 1L << --height[col]; // reverses (1)
+            bitBoard[counter & 1] ^= move;  // reverses (2)
+        }
+
+        public bool IsWin(int player)
+        {
+            long currentBitBoard = bitBoard[player];
+
+            int[] directions = { 1, 7, 6, 8 };
+            long bb;
+
+            for (int i = 0; i < directions.Length; i++)
+            {
+                int direction = directions[i];
+
+                bb = currentBitBoard & (currentBitBoard >> direction);
+                if ((bb & (bb >> (2 * direction))) != 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public bool IsFull()
+        {
+            for (int col = 0; col <= 6; col++)
+            {
+                if ((TOP & (1L << height[col])) == 0)
+                { 
+                    return false;
+                } 
+            }
+
+            return true;
+        }
+
+        public List<int> PossibleMoves()
+        {
+            List<int> possibleMoves = new List<int>();
+            long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
+
+            for (int col = 0; col <= 6; col++)
+            {
+                if ((TOP & (1L << height[col])) == 0) possibleMoves.Add(col);
+            }
+
+            return possibleMoves;
+        }
+
+        private int minMaxAlphaBeta(FullSimBoard simBoard, int depth, int alpha, int beta, bool maximizingPlayer)
+        {
+            if (depth == 0)
+            {
+                return 0;
+            }
+
+            if (simBoard.IsWin(1))
+            {
+                return 100-depth;
+            }
+
+            if (simBoard.IsWin(0))
+            {
+                return -depth;
+            }
+
+            if (simBoard.IsFull())
+            {
+                return 0;
+            }
+
+            if (maximizingPlayer)
+            {
+                int maxEval = int.MinValue;
+
+                foreach (int move in PossibleMoves())
+                {
+                    FullSimBoard newSimBoard = simBoard;
+
+                    newSimBoard.PlacePiece(move);
+
+                    int eval = minMaxAlphaBeta(newSimBoard, depth - 1, alpha, beta, false);
+
+                    maxEval = Math.Max(maxEval, eval);
+
+                    alpha = Math.Max(alpha, eval);
+
+                    if (beta <= alpha)
+                    {
+                        break;
+                    }
+                }
+
+                return maxEval;
+            }
+            else
+            {
+                int minEval = int.MaxValue;
+
+                foreach (int move in PossibleMoves())
+                {
+                    FullSimBoard newSimBoard = simBoard;
+
+                    newSimBoard.PlacePiece(move);
+
+                    int eval = minMaxAlphaBeta(newSimBoard, depth - 1, alpha, beta, true);
+
+                    minEval = Math.Min(minEval, eval);
+
+                    beta = Math.Min(beta, eval);
+
+                    if (beta <= alpha)
+                    {
+                        break;
+                    }
+                }
+
+                return minEval;
+            }
+        }
+
+        public void GenerateMove()
+        {
+            List<int> bestMoves = new List<int>();
+
+            //Console.SetCursorPosition(0, 0);
+
+            foreach (int move in PossibleMoves())
+            {
+
+                FullSimBoard simBoard = new FullSimBoard(height, counter, moves, bitBoard);
+
+                simBoard.PlacePiece(move);
+
+                int test = minMaxAlphaBeta(simBoard, 1, int.MinValue, int.MaxValue, true);
+
+                //Console.WriteLine(move + "-" + test);
+
+                //Console.WriteLine("WAIT");
+            }
+
+            //Console.ReadKey();
+        }
     }
 
     /// <summary> Class used to manage drops of pieces in the game </summary>
@@ -139,6 +450,9 @@ namespace ConsoleConnectFour
         /// <summary> Stored game mode</summary>
         MenuItem gameMode;
 
+        /// <summary> Paired menu birboard instance </summary>
+        Bitboard bitboardInstance;
+
         /// <summary> Init class by setting vars and starting screen</summary>
         public Game(MenuItem Mode)
         {
@@ -148,7 +462,10 @@ namespace ConsoleConnectFour
             dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
 
             GameScreen.Setup();
+
+            bitboardInstance = new Bitboard();
         }
+
 
         /// <summary> Loop for each interaction with console </summary>
         public GameExitStatus Loop()
@@ -176,6 +493,20 @@ namespace ConsoleConnectFour
                     // Only need to check if the game has eneded/switch active player if a piece was dropped
                     if (dropSystemInstance.Release(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode))
                     {
+                        bitboardInstance.MakeMove(dropSystemInstance.Column);
+
+                        if (bitboardInstance.IsWin(0))
+                        {
+                            Console.Clear();
+                            Console.WriteLine("0 win");
+                        }
+
+                        if(bitboardInstance.IsWin(1))
+                        {
+                            Console.Clear();
+                            Console.WriteLine("1 Win");
+                        }
+
                         // Use the game logic to check if a piece was dropped in the board
                         if (Logic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
                         {
@@ -200,6 +531,7 @@ namespace ConsoleConnectFour
                                 piecePlacementInstance.PlayerCode = 2;
                                 dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
 
+                                bitboardInstance.GenerateMove();
                             }
                             else
                             {

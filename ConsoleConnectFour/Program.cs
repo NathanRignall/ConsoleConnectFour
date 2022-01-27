@@ -12,8 +12,8 @@ namespace ConsoleConnectFour
             // Generally setup the console for use (only works in windows)
             Console.CursorVisible = false;
             Console.Title = "Console Connect Four";
-            Console.SetWindowSize(53, 25);
-            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
+            //Console.SetWindowSize(53, 25);
+            //Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
 
             // Setup the http client for use with API
             Client.Setup();
