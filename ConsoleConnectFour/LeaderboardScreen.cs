@@ -15,6 +15,11 @@ namespace ConsoleConnectFour
         public static void Update(LeaderboardObj[] scores)
         {
             Console.Clear();
+
+            Console.SetCursorPosition(14, 1);
+
+            string output = " * Online Leaderboard * ";
+            Console.WriteLine(output.PadSides(26));
             
             // Number of scores
             int scoreCount = scores.GetLength(0);
@@ -22,8 +27,11 @@ namespace ConsoleConnectFour
             // Print each line of grid out on board
             for (int i = 0; i < scoreCount; i++)
             {
-                Console.SetCursorPosition(6, i);
-                Console.WriteLine(scores[i].total_points + " - " + scores[i].user.username);
+                Console.SetCursorPosition(14, i + 3);
+
+                output = $"[{scores[i].user.username} - {scores[i].total_points}]";
+
+                Console.WriteLine(output.PadSides(26));
             }
         }
     }
