@@ -12,140 +12,6 @@ namespace ConsoleConnectFour
         public bool won;
     }
 
-    class FullSimBoard
-    {
-        int[] height;
-        int counter;
-        long[] moves;
-        long[] bitBoard;
-        long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
-
-        public FullSimBoard(int[] setHeight, int setCounter, long[] setMoves, long[] setBitBoard)
-        {
-            height = setHeight;
-            counter = setCounter;
-            moves = setMoves;
-            bitBoard = setBitBoard;
-        }
-
-        public bool PlacePiece(int col)
-        {
-            if ((TOP & (1L << height[col])) == 0)
-            {
-                long move = 1L << height[col]++;
-                bitBoard[counter & 1] ^= move;
-                moves[counter++] = col;
-
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        public bool IsFull()
-        {
-            for (int col = 0; col <= 6; col++)
-            {
-                if ((TOP & (1L << height[col])) == 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public List<int> PossibleMoves()
-        {
-            List<int> possibleMoves = new List<int>();
-            long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
-
-            for (int col = 0; col <= 6; col++)
-            {
-                if ((TOP & (1L << height[col])) == 0) possibleMoves.Add(col);
-            }
-
-            return possibleMoves;
-        }
-
-        public bool IsWin(int player)
-        {
-            long currentBitBoard = bitBoard[player];
-
-            int[] directions = { 1, 7, 6, 8 };
-            long bb;
-
-            for (int i = 0; i < directions.Length; i++)
-            {
-                int direction = directions[i];
-
-                bb = currentBitBoard & (currentBitBoard >> direction);
-                if ((bb & (bb >> (2 * direction))) != 0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
-
-    struct DataSimBoard
-    {
-        public int[] height;
-        public int counter;
-        public long[] moves;
-        public long[] bitBoard;
-    }
-
-    class SimBoard
-    {
-        public static long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
-
-        public static DataSimBoard MakeMove(DataSimBoard board, int col)
-        {
-            long move = 1L << board.height[col]++; // (1)
-            board.bitBoard[board.counter & 1] ^= move;  // (2)
-            board.moves[board.counter++] = col;         // (3)
-
-            return board;
-        }
-
-        public static bool IsWin(DataSimBoard board, int player)
-        {
-            long currentBitBoard = board.bitBoard[player];
-
-            int[] directions = { 1, 7, 6, 8 };
-            long bb;
-
-            for (int i = 0; i < directions.Length; i++)
-            {
-                int direction = directions[i];
-
-                bb = currentBitBoard & (currentBitBoard >> direction);
-                if ((bb & (bb >> (2 * direction))) != 0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static bool IsFull(DataSimBoard board)
-        {
-            for (int col = 0; col <= 6; col++)
-            {
-                if ((TOP & (1L << board.height[col])) == 0)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-    }
-
     class Bitboard
     {
         public int[] height;
@@ -175,8 +41,8 @@ namespace ConsoleConnectFour
 
         public void UndoMove()
         {
-            long col = moves[--counter];     // reverses (3)
-            long move = 1L << --height[col]; // reverses (1)
+            long col = moves[counter--];     // reverses (3)
+            long move = 1L << height[col]--; // reverses (1)
             bitBoard[counter & 1] ^= move;  // reverses (2)
         }
 
@@ -226,7 +92,7 @@ namespace ConsoleConnectFour
             return possibleMoves;
         }
 
-        private int minMaxAlphaBeta(FullSimBoard simBoard, int depth, int alpha, int beta, bool maximizingPlayer)
+        private int minMaxAlphaBeta(SimulateBoard simBoard, int depth, bool maximizingPlayer)
         {
             if (depth == 0)
             {
@@ -235,7 +101,7 @@ namespace ConsoleConnectFour
 
             if (simBoard.IsWin(1))
             {
-                return 100-depth;
+                return depth;
             }
 
             if (simBoard.IsWin(0))
@@ -254,20 +120,14 @@ namespace ConsoleConnectFour
 
                 foreach (int move in PossibleMoves())
                 {
-                    FullSimBoard newSimBoard = simBoard;
 
-                    newSimBoard.PlacePiece(move);
+                    simBoard.PlacePiece(move);
 
-                    int eval = minMaxAlphaBeta(newSimBoard, depth - 1, alpha, beta, false);
+                    int eval = minMaxAlphaBeta(simBoard, depth - 1, false);
+
+                    simBoard.UndoPlacePiece();
 
                     maxEval = Math.Max(maxEval, eval);
-
-                    alpha = Math.Max(alpha, eval);
-
-                    if (beta <= alpha)
-                    {
-                        break;
-                    }
                 }
 
                 return maxEval;
@@ -278,20 +138,13 @@ namespace ConsoleConnectFour
 
                 foreach (int move in PossibleMoves())
                 {
-                    FullSimBoard newSimBoard = simBoard;
+                    simBoard.PlacePiece(move);
 
-                    newSimBoard.PlacePiece(move);
+                    int eval = minMaxAlphaBeta(simBoard, depth - 1, true);
 
-                    int eval = minMaxAlphaBeta(newSimBoard, depth - 1, alpha, beta, true);
+                    simBoard.UndoPlacePiece();
 
                     minEval = Math.Min(minEval, eval);
-
-                    beta = Math.Min(beta, eval);
-
-                    if (beta <= alpha)
-                    {
-                        break;
-                    }
                 }
 
                 return minEval;
@@ -302,23 +155,24 @@ namespace ConsoleConnectFour
         {
             List<int> bestMoves = new List<int>();
 
-            //Console.SetCursorPosition(0, 0);
+            Console.SetCursorPosition(0, 0);
+
+            SimulateBoard simulateBoard = new SimulateBoard(height, counter, moves, bitBoard);
 
             foreach (int move in PossibleMoves())
             {
+                simulateBoard.PlacePiece(move);
 
-                FullSimBoard simBoard = new FullSimBoard(height, counter, moves, bitBoard);
+                int test = minMaxAlphaBeta(simulateBoard, 6, true);
 
-                simBoard.PlacePiece(move);
+                simulateBoard.UndoPlacePiece();
 
-                int test = minMaxAlphaBeta(simBoard, 1, int.MinValue, int.MaxValue, true);
+                bestMoves.Add(test);
 
-                //Console.WriteLine(move + "-" + test);
+                
 
-                //Console.WriteLine("WAIT");
+                Console.WriteLine(test);
             }
-
-            //Console.ReadKey();
         }
     }
 

@@ -173,7 +173,7 @@ namespace ConsoleConnectFour
         {
             try
             {
-                var leaderboardPayload = await apiClient.GetFromJsonAsync<LeaderboardPayloadObj>("/leaderboard/4a16036e-a969-4211-9a14-32702eee265f");
+                var leaderboardPayload = await apiClient.GetFromJsonAsync<LeaderboardPayloadObj>("/leaderboard/095dfcdf-23fc-408c-8ee1-a7e3abb9d335");
 
                 return leaderboardPayload;
             }
@@ -200,7 +200,7 @@ namespace ConsoleConnectFour
 
             try
             {
-                HttpResponseMessage postResponse = await apiClient.PostAsJsonAsync("/leaderboard/4a16036e-a969-4211-9a14-32702eee265f", postUser);
+                HttpResponseMessage postResponse = await apiClient.PostAsJsonAsync("/leaderboard/095dfcdf-23fc-408c-8ee1-a7e3abb9d335", postUser);
                 postResponse.EnsureSuccessStatusCode();
             }
             catch (HttpRequestException e)

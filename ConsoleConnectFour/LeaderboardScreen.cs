@@ -23,7 +23,7 @@ namespace ConsoleConnectFour
             for (int i = 0; i < scoreCount; i++)
             {
                 Console.SetCursorPosition(6, i);
-                Console.WriteLine(scores[i]);
+                Console.WriteLine(scores[i].total_points + " - " + scores[i].user.username);
             }
         }
     }

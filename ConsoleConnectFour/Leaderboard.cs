@@ -10,8 +10,7 @@ namespace ConsoleConnectFour
 
         /// <summary> Init class by starting screen</summary>
         public Leaderboard() {
-            Task<LeaderboardPayloadObj> task = Client.Leaderboard();
-            leaderboard = task.Result;
+            leaderboard = Client.Leaderboard().Result;
 
             LeaderboardScreen.Setup();
         }
@@ -23,7 +22,7 @@ namespace ConsoleConnectFour
             while (true)
             {
                 // Re-render the screen on each action
-                //LeaderboardScreen.Update(leaderboard.scores);
+                LeaderboardScreen.Update(leaderboard.scores);
 
                 // The key that was last pressed by the user
                 ConsoleKey key = Console.ReadKey(true).Key;
