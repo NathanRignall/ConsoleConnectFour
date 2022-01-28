@@ -21,8 +21,10 @@ namespace ConsoleConnectFour
             // Main leaderboard loop
             while (true)
             {
-                // Re-render the screen on each action
-                LeaderboardScreen.Update(leaderboard.scores);
+                if(leaderboard != null){
+                    // Re-render the screen on each action
+                    LeaderboardScreen.Update(leaderboard.scores);
+                }
 
                 // The key that was last pressed by the user
                 ConsoleKey key = Console.ReadKey(true).Key;
