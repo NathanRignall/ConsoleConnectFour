@@ -12,170 +12,6 @@ namespace ConsoleConnectFour
         public bool won;
     }
 
-    class Bitboard
-    {
-        public int[] height;
-        public int counter;
-        public long[] moves;
-        public long[] bitBoard;
-        long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
-
-        Random rand;
-
-        public Bitboard()
-        {
-            height = new int[] { 0, 7, 14, 21, 28, 35, 42 };
-            counter = 0;
-            moves = new long[42];
-            bitBoard = new long[2];
-
-            rand = new Random();
-        }
-
-        public void MakeMove(int col)
-        {
-            long move = 1L << height[col]++; // (1)
-            bitBoard[counter & 1] ^= move;  // (2)
-            moves[counter++] = col;         // (3)
-        }
-
-        public void UndoMove()
-        {
-            long col = moves[counter--];     // reverses (3)
-            long move = 1L << height[col]--; // reverses (1)
-            bitBoard[counter & 1] ^= move;  // reverses (2)
-        }
-
-        public bool IsWin(int player)
-        {
-            long currentBitBoard = bitBoard[player];
-
-            int[] directions = { 1, 7, 6, 8 };
-            long bb;
-
-            for (int i = 0; i < directions.Length; i++)
-            {
-                int direction = directions[i];
-
-                bb = currentBitBoard & (currentBitBoard >> direction);
-                if ((bb & (bb >> (2 * direction))) != 0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public bool IsFull()
-        {
-            for (int col = 0; col <= 6; col++)
-            {
-                if ((TOP & (1L << height[col])) == 0)
-                { 
-                    return false;
-                } 
-            }
-
-            return true;
-        }
-
-        public List<int> PossibleMoves()
-        {
-            List<int> possibleMoves = new List<int>();
-            long TOP = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
-
-            for (int col = 0; col <= 6; col++)
-            {
-                if ((TOP & (1L << height[col])) == 0) possibleMoves.Add(col);
-            }
-
-            return possibleMoves;
-        }
-
-        private int minMaxAlphaBeta(SimulateBoard simBoard, int depth, bool maximizingPlayer)
-        {
-            if (depth == 0)
-            {
-                return 0;
-            }
-
-            if (simBoard.IsWin(1))
-            {
-                return depth;
-            }
-
-            if (simBoard.IsWin(0))
-            {
-                return -depth;
-            }
-
-            if (simBoard.IsFull())
-            {
-                return 0;
-            }
-
-            if (maximizingPlayer)
-            {
-                int maxEval = int.MinValue;
-
-                foreach (int move in PossibleMoves())
-                {
-
-                    simBoard.PlacePiece(move);
-
-                    int eval = minMaxAlphaBeta(simBoard, depth - 1, false);
-
-                    simBoard.UndoPlacePiece();
-
-                    maxEval = Math.Max(maxEval, eval);
-                }
-
-                return maxEval;
-            }
-            else
-            {
-                int minEval = int.MaxValue;
-
-                foreach (int move in PossibleMoves())
-                {
-                    simBoard.PlacePiece(move);
-
-                    int eval = minMaxAlphaBeta(simBoard, depth - 1, true);
-
-                    simBoard.UndoPlacePiece();
-
-                    minEval = Math.Min(minEval, eval);
-                }
-
-                return minEval;
-            }
-        }
-
-        public void GenerateMove()
-        {
-            List<int> bestMoves = new List<int>();
-
-            Console.SetCursorPosition(0, 0);
-
-            SimulateBoard simulateBoard = new SimulateBoard(height, counter, moves, bitBoard);
-
-            foreach (int move in PossibleMoves())
-            {
-                simulateBoard.PlacePiece(move);
-
-                int test = minMaxAlphaBeta(simulateBoard, 6, true);
-
-                simulateBoard.UndoPlacePiece();
-
-                bestMoves.Add(test);
-
-                
-
-                Console.WriteLine(test);
-            }
-        }
-    }
-
     /// <summary> Class used to manage drops of pieces in the game </summary>
     class DropSystem
     {
@@ -226,6 +62,12 @@ namespace ConsoleConnectFour
                     PiecePlacementGrid[0, x] = 0;
                 }
             }
+        }
+
+        /// <summary> Set a column specifically </summary>
+        public void SpecifyMove(int setColumn)
+        {
+            Column = setColumn;
         }
 
         /// <summary> Drop a piece in the selected column </summary>
@@ -305,7 +147,7 @@ namespace ConsoleConnectFour
         MenuItem gameMode;
 
         /// <summary> Paired menu birboard instance </summary>
-        Bitboard bitboardInstance;
+        GameBoard gameBoardInstance;
 
         /// <summary> Init class by setting vars and starting screen</summary>
         public Game(MenuItem Mode)
@@ -317,7 +159,7 @@ namespace ConsoleConnectFour
 
             GameScreen.Setup();
 
-            bitboardInstance = new Bitboard();
+            gameBoardInstance = new GameBoard(2);
         }
 
 
@@ -347,19 +189,7 @@ namespace ConsoleConnectFour
                     // Only need to check if the game has eneded/switch active player if a piece was dropped
                     if (dropSystemInstance.Release(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode))
                     {
-                        bitboardInstance.MakeMove(dropSystemInstance.Column);
-
-                        if (bitboardInstance.IsWin(0))
-                        {
-                            Console.Clear();
-                            Console.WriteLine("0 win");
-                        }
-
-                        if(bitboardInstance.IsWin(1))
-                        {
-                            Console.Clear();
-                            Console.WriteLine("1 Win");
-                        }
+                        gameBoardInstance.PlacePiece(dropSystemInstance.Column);
 
                         // Use the game logic to check if a piece was dropped in the board
                         if (Logic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
@@ -377,6 +207,34 @@ namespace ConsoleConnectFour
                             return returnMessage;
                         }
 
+                        // Sinle player selection sequence
+                        if (gameMode == MenuItem.local_single)
+                        {
+                                piecePlacementInstance.PlayerCode = 2;
+
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+
+                                int bestMove = GameAI.GenerateMove(gameBoardInstance);
+                                
+                                dropSystemInstance.SpecifyMove(bestMove);
+
+                                dropSystemInstance.Release(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                    
+                                // Use the game logic to check if a piece was dropped in the board
+                                if (Logic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
+                                {
+                                    // Contains the outcome of the game insatnce
+                                    GameExitStatus returnMessage;
+                                    returnMessage.won = true;
+                                    returnMessage.message = "Game Over! Well done AI";
+
+                                    return returnMessage;
+                                }
+
+                                piecePlacementInstance.PlayerCode = 1;
+                                dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                        }
+
                         // Dual player selection sequence
                         if (gameMode == MenuItem.local_dual)
                         {
@@ -384,8 +242,6 @@ namespace ConsoleConnectFour
                             {
                                 piecePlacementInstance.PlayerCode = 2;
                                 dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
-
-                                bitboardInstance.GenerateMove();
                             }
                             else
                             {

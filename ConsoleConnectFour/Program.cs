@@ -26,6 +26,7 @@ namespace ConsoleConnectFour
 
                 switch (systemMode)
                 {
+                    case MenuItem.local_single:
                     case MenuItem.local_dual:
                     case MenuItem.local_tripple:
                     case MenuItem.local_quad:
