@@ -1,42 +1,66 @@
 ﻿using System;
-
+using System.Threading.Tasks;
 
 namespace ConsoleConnectFour
 {
-
-    public static class GlobalFunctions
-    {
-        public static void WriteAt(string s, int x, int y)
-        {
-            try
-            {
-                Console.SetCursorPosition(x, y);
-                Console.Write(s);
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                Console.Clear();
-                Console.WriteLine(e.Message);
-            }
-        }
-    }
-
+    /// <summary> Main whole program class </summary>
     class Program
     {
-        protected static void setupConsole()
+        /// <summary> Task for game to allow async methods </summary>
+        static async Task<int> Main(string[] args)
         {
+            // Generally setup the console for use (only works in windows)
             Console.CursorVisible = false;
             Console.Title = "Console Connect Four";
-            Console.SetWindowSize(79, 42);
-            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
-        }
+            //Console.SetWindowSize(53, 25);
+            //Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
 
+            // Setup the http client for use with API
+            Client.Setup();
 
-        static void Main(string[] args)
-        {
-            setupConsole();
+            // Main game loop - contains sub loops but always returns here.
+            while (true)
+            {
+                Menu menuInstance = new Menu(Client.LoggedIn, Client.User);
+                MenuItem systemMode = menuInstance.Loop();
 
-            Game DefaultGame = new Game();
+                switch (systemMode)
+                {
+                    case MenuItem.local_single:
+                    case MenuItem.local_dual:
+                    case MenuItem.local_tripple:
+                    case MenuItem.local_quad:
+                        Game gameInstance = new Game(systemMode);
+                        GameExitStatus gameExitInfo = gameInstance.Loop();
+
+                        // Only if exit due to win should show celebration
+                        if (gameExitInfo.won)
+                        {
+                            Message messageInstance = new Message(gameExitInfo);
+                            messageInstance.Loop();
+                        }
+
+                        break;
+                    case MenuItem.leaderboard:
+                        Leaderboard leaderboardInstance = new Leaderboard();
+                        leaderboardInstance.Loop();
+                        break;
+                    case MenuItem.login:
+                        await Client.Login();
+                        break;
+                    case MenuItem.register:
+                        await Client.Register();
+                        break;
+                    case MenuItem.info:
+                        await Client.Info();
+                        break;
+                    case MenuItem.quit:
+                        Console.Clear();
+                        return 0;
+                    default:
+                        break;
+                }
+            }
         }
     }
 }
