@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 
 namespace ConsoleConnectFour
 {
@@ -47,19 +48,6 @@ namespace ConsoleConnectFour
                 " x x ",
             };
 
-
-        /// <summary> Contains the current placement of pieces in the board on screen</summary>
-        private static int[,] currentPiecePlacementGrid =
-            {
-                { 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0 },
-                { 0, 0, 0, 0, 0, 0, 0 },
-            };
-
         /// <summary> Array of where pieces are placed on board</summary>
         private static int[,,] boardConolePlacement =
             {
@@ -82,26 +70,26 @@ namespace ConsoleConnectFour
                 switch (piece)
                 {
                     case 0:
-                        Console.ForegroundColor = ConsoleColor.White;
-                        break;
-                    case 1:
                         Console.ForegroundColor = ConsoleColor.Red;
                         break;
-                    case 2:
+                    case 1:
                         Console.ForegroundColor = ConsoleColor.Blue;
                         break;
-                    case 3:
+                    case 2:
                         Console.ForegroundColor = ConsoleColor.Green;
                         break;
-                    case 4:
+                    case 3:
                         Console.ForegroundColor = ConsoleColor.Yellow;
+                        break;
+                    case 99:
+                        Console.ForegroundColor = ConsoleColor.White;
                         break;
                 }
 
                 // Move cursor position to correct place on grid
                 Console.SetCursorPosition(boardConolePlacement[y, x, 0], boardConolePlacement[y, x, 1]);
 
-                if(piece == 0){
+                if(piece == 99){
                     Console.WriteLine(emptyPiece[0]);
                 } else {
                     Console.WriteLine(filledPiece[0]);
@@ -110,7 +98,7 @@ namespace ConsoleConnectFour
                 
                 // Move cursor position to correct place on grid below
                 Console.SetCursorPosition(boardConolePlacement[y, x, 0], boardConolePlacement[y, x, 1] + 1);
-                if(piece == 0){
+                if(piece == 99){
                     Console.WriteLine(emptyPiece[1]);
                 } else {
                     Console.WriteLine(filledPiece[1]);
@@ -148,23 +136,28 @@ namespace ConsoleConnectFour
         }
 
         /// <summary> Function used to update the game board given piece array</summary>
-        public static void Update(int[,] desiredPiecePlacementGrid)
+        public static void Update(GameBoard board, GameDropSelector selector)
         {
-            // Make sure the baord has actually updated
-            if (currentPiecePlacementGrid != desiredPiecePlacementGrid)
-            {
-                // Foreach row in grid
-                for (int x = 0; x < desiredPiecePlacementGrid.GetLength(0); x++)
-                {
-                    // Foreach collumn
-                    for (int y = 0; y < desiredPiecePlacementGrid.GetLength(1); y++)
-                    {
-                        // Get the cell value
-                        int cell = desiredPiecePlacementGrid[y, x];
+            long player1board = board.board[0];
+            long player2board = board.board[1];
 
-                        // place the piece on the board
-                        PlacePiece(cell, y, x);
-                    }
+            for (int i = 0; i < selector.row.Length; i++)
+            {
+                if(selector.row[i] == true)
+                {
+                    PlacePiece(board.GetPlayerCode(), 0, i);
+                } else {
+                    PlacePiece(99, 0, i);
+                }
+            }
+
+            for (int i = 64; i >= 0 ; i--)
+            {
+                int mask = 1 << i;
+                
+                if((player1board & mask) != 0)
+                {
+                    PlacePiece(board.GetPlayerCode(), i - 6* (i/6 - 1), i/6 - 1);
                 }
             }
         }
