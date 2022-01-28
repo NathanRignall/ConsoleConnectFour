@@ -56,7 +56,7 @@ namespace ConsoleConnectFour
             clienthandler = new HttpClientHandler { AllowAutoRedirect = true, UseCookies = true, CookieContainer = cookieContainer };
 
             apiClient = new HttpClient(clienthandler);
-            apiClient.BaseAddress = new Uri("http://localhost:4000");
+            apiClient.BaseAddress = new Uri("http://garage.nathanrignall.uk:4001");
 
             LoggedIn = false;
         }
