@@ -3,7 +3,7 @@ using System;
 namespace ConsoleConnectFour
 {
     /// <summary> Class for game logic - Methods are static due to this being used in many places without init</summary>
-    class Logic
+    class GameLogic
     {
         /// <summary> Function used to check if a peice is on a connect 4 line </summary>
         static bool checkPiece(int[,] pieceGrid, int currentPieceY, int currentPieceX, int currentPiecePlayer)
@@ -205,6 +205,21 @@ namespace ConsoleConnectFour
             }
 
             return false;
+        }
+
+        public static bool IsFull(int[,] pieceGrid)
+        {
+            // For each column as row known (top)
+            for (int x = 0; x < pieceGrid.GetLength(0); x++)
+            {
+                // if the space is empty the board is not full
+                if(pieceGrid[1, x] == 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

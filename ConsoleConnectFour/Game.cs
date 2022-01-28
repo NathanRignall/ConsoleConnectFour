@@ -146,7 +146,7 @@ namespace ConsoleConnectFour
         /// <summary> Stored game mode</summary>
         MenuItem gameMode;
 
-        /// <summary> Paired menu birboard instance </summary>
+        /// <summary> Paired menu game board instance </summary>
         GameBoard gameBoardInstance;
 
         /// <summary> Init class by setting vars and starting screen</summary>
@@ -157,9 +157,13 @@ namespace ConsoleConnectFour
             piecePlacementInstance = new PiecePlacement();
             dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
 
-            GameScreen.Setup();
+            // only need to instanciate bit board if in single player
+            if (gameMode == MenuItem.local_single)
+            {
+                gameBoardInstance = new GameBoard();
+            }
 
-            gameBoardInstance = new GameBoard(2);
+            GameScreen.Setup();
         }
 
 
@@ -189,10 +193,14 @@ namespace ConsoleConnectFour
                     // Only need to check if the game has eneded/switch active player if a piece was dropped
                     if (dropSystemInstance.Release(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode))
                     {
-                        gameBoardInstance.PlacePiece(dropSystemInstance.Column);
-
+                        // also place piece in bit board if in single player for AI
+                        if (gameMode == MenuItem.local_single)
+                        {
+                            gameBoardInstance.PlacePiece(dropSystemInstance.Column);
+                        }
+                        
                         // Use the game logic to check if a piece was dropped in the board
-                        if (Logic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
+                        if (GameLogic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
                         {
                             // Contains the outcome of the game insatnce
                             GameExitStatus returnMessage;
@@ -210,27 +218,30 @@ namespace ConsoleConnectFour
                         // Sinle player selection sequence
                         if (gameMode == MenuItem.local_single)
                         {
+                                // set the player code as normal for AI
                                 piecePlacementInstance.PlayerCode = 2;
-
                                 dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
 
+                                // generate a best move using AI
                                 int bestMove = GameAI.GenerateMove(gameBoardInstance);
-                                
-                                dropSystemInstance.SpecifyMove(bestMove);
 
+                                // place the best
+                                dropSystemInstance.SpecifyMove(bestMove);
                                 dropSystemInstance.Release(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
+                                gameBoardInstance.PlacePiece(dropSystemInstance.Column);
                                     
-                                // Use the game logic to check if a piece was dropped in the board
-                                if (Logic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
+                                // Use the game logic to check if a piece was dropped in the board (repeated code)
+                                if (GameLogic.GameOver(piecePlacementInstance.Grid, dropSystemInstance.Column))
                                 {
                                     // Contains the outcome of the game insatnce
                                     GameExitStatus returnMessage;
                                     returnMessage.won = true;
-                                    returnMessage.message = "Game Over! Well done AI";
+                                    returnMessage.message = "Game Over! Well done AI :)";
 
                                     return returnMessage;
                                 }
 
+                                // set the player code back to normal 
                                 piecePlacementInstance.PlayerCode = 1;
                                 dropSystemInstance = new DropSystem(ref piecePlacementInstance.Grid, piecePlacementInstance.PlayerCode);
                         }
@@ -303,6 +314,17 @@ namespace ConsoleConnectFour
                     GameExitStatus returnMessage;
                     returnMessage.won = false;
                     returnMessage.message = "Quit";
+
+                    return returnMessage;
+                }
+
+                // check if the board is full
+                if (GameLogic.IsFull(piecePlacementInstance.Grid))
+                {
+                    // Contains the outcome of the game insatnce
+                    GameExitStatus returnMessage;
+                    returnMessage.won = true;
+                    returnMessage.message = "Draw! The board is full.";
 
                     return returnMessage;
                 }

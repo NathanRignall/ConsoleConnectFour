@@ -11,12 +11,12 @@ namespace ConsoleConnectFour
 
         private long topMarker;
 
-        public GameBoard(int players)
+        public GameBoard()
         {
             height = new int[] { 0, 7, 14, 21, 28, 35, 42 };
             counter = 0;
             moves = new long[42];
-            board = new long[players];
+            board = new long[2];
 
             topMarker = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
         }
