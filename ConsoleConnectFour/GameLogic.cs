@@ -207,6 +207,7 @@ namespace ConsoleConnectFour
             return false;
         }
 
+        /// <summary> Check if the board is full </summary>
         public static bool IsFull(int[,] pieceGrid)
         {
             // For each column as row known (top)

@@ -7,7 +7,7 @@ namespace ConsoleConnectFour
     class Program
     {
         /// <summary> Task for game to allow async methods </summary>
-        static async Task Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             // Generally setup the console for use (only works in windows)
             Console.CursorVisible = false;
@@ -44,20 +44,19 @@ namespace ConsoleConnectFour
                     case MenuItem.leaderboard:
                         Leaderboard leaderboardInstance = new Leaderboard();
                         leaderboardInstance.Loop();
-
                         break;
                     case MenuItem.login:
                         await Client.Login();
-
                         break;
                     case MenuItem.register:
                         await Client.Register();
-
                         break;
                     case MenuItem.info:
                         await Client.Info();
-                        
                         break;
+                    case MenuItem.quit:
+                        Console.Clear();
+                        return 0;
                     default:
                         break;
                 }

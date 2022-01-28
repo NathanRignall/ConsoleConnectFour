@@ -50,8 +50,6 @@ namespace ConsoleConnectFour
         private static CookieContainer cookieContainer;
         private static HttpClientHandler clienthandler;
         private static HttpClient apiClient;
-
-
         public static void Setup()
         {
             cookieContainer = new CookieContainer();
@@ -143,6 +141,8 @@ namespace ConsoleConnectFour
 
         public static async Task Info()
         {
+            Console.Clear();
+
             Console.WriteLine("Info System \n");
 
             try
@@ -179,16 +179,21 @@ namespace ConsoleConnectFour
             }
             catch (HttpRequestException) // Non success
             {
+                Console.Clear();
                 Console.WriteLine("An error occurred.");
+                Console.ReadKey();
             }
             catch (NotSupportedException) // When content type is not valid
             {
+                Console.Clear();
                 Console.WriteLine("The content type is not supported.");
+                Console.ReadKey();
             }
             catch (System.Text.Json.JsonException e) // Invalid JSON
             {
                 Console.WriteLine("Invalid JSON.");
                 Console.WriteLine(e.Message);
+                Console.ReadKey();
             }
 
             return null;

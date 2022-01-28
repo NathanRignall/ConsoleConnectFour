@@ -97,6 +97,8 @@ namespace ConsoleConnectFour
                     return true;
                 case MenuItem.info:
                     return true;
+                case MenuItem.quit:
+                    return true;
                 default:
                     return false;
             }

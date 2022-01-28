@@ -2,15 +2,25 @@ using System.Collections.Generic;
 
 namespace ConsoleConnectFour
 {
+    /// <summary> Class used for manging the game board state </summary>
     public class GameBoard
     {
+        /// <summary> Number of pieces placed </summary>
         public int counter;
+
+        /// <summary> Height of columns in board </summary>
         public readonly int[] height;
+
+        /// <summary> Array of all moves </summary>
         public readonly long[] moves;
+
+        /// <summary> Bit array of boards for players </summary>
         public readonly long[] board;
 
+        /// <summary> Bits used for masking top </summary>
         private long topMarker;
 
+        /// <summary> Init class by setting </summary>
         public GameBoard()
         {
             height = new int[] { 0, 7, 14, 21, 28, 35, 42 };
@@ -21,6 +31,7 @@ namespace ConsoleConnectFour
             topMarker = 0b1000000_1000000_1000000_1000000_1000000_1000000_1000000L;
         }
 
+        /// <summary> Drop a peice on the board give the column </summary>
         public bool PlacePiece(int col)
         {
             if ((topMarker & (1L << height[col])) == 0)
@@ -37,6 +48,7 @@ namespace ConsoleConnectFour
             }
         }
 
+        /// <summary> Undo moving the last dropped piece </summary>
         public void UndoPlacePiece()
         {
             long col = moves[--counter];
@@ -44,6 +56,7 @@ namespace ConsoleConnectFour
             board[counter & 1] ^= move;
         }
 
+        /// <summary> Check if the board is full </summary>
         public bool IsFull()
         {
             for (int col = 0; col <= 6; col++)
@@ -57,10 +70,9 @@ namespace ConsoleConnectFour
             return true;
         }
 
+        /// <summary> Produce a list of possible moves </summary>
         public List<int> PossibleMoves()
         {
-
-
             List<int> possibleMoves = new List<int>();
 
             for (int col = 0; col <= 6; col++)
@@ -71,6 +83,7 @@ namespace ConsoleConnectFour
             return possibleMoves;
         }
 
+        /// <summary> Check if a player has won </summary>
         public bool IsWin(int player)
         {
             long currentBitBoard = board[player];
@@ -89,16 +102,6 @@ namespace ConsoleConnectFour
                 }
             }
             return false;
-        }
-
-        public bool IsWinCurrent()
-        {
-            return IsWin(counter & 1);
-        }
-
-        public int GetPlayerCode()
-        {
-            return counter & 1;
         }
     }
 }

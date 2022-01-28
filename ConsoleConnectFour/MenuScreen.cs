@@ -70,6 +70,8 @@ namespace ConsoleConnectFour
                     return "Register";
                 case MenuItem.info:
                     return "Info";
+                case MenuItem.quit:
+                    return "Quit";
                 default:
                     return "test";
             }
@@ -85,7 +87,7 @@ namespace ConsoleConnectFour
             // Height of the menu
             int menuHeight = menuOutline.GetLength(0);
 
-            // Print each line of grid out on board
+            // Print each line of menu out on board
             for (int y = 0; y < menuHeight; y++)
             {
                 Console.SetCursorPosition(6, y);
