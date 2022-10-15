@@ -1,6 +1,6 @@
 # Console Connect Four c#
 
-This is a console based connect four application build in .Net 6
+This is a console based connect four application built in .Net 6 for an assignment.
 
 There are 4 local game modes, single player, two player, three player and four player.
 
